@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class TreeData
+public class TreeChunk
 {
 		[System.Serializable]
 		public struct TreeInfo
@@ -20,7 +20,7 @@ public class TreeData
 		private WorldGen World;
 		private TreeInfo thisTree;
 
-		public TreeData(Vector2 loc, int _seed,WorldGen wg)
+		public TreeChunk(Vector2 loc, int _seed,WorldGen wg)
 		{
 			location = loc;
 			Seed = _seed;

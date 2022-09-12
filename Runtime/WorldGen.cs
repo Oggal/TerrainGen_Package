@@ -57,10 +57,10 @@ public class WorldGen : MonoBehaviour {
 	public float TreeChunkSize = 500;
 	public float TreeDensity = 1;
 	private TerrainNoise TreeChanceMap;
-	private Dictionary<Vector2Int, TreeData[]> TreeChunks = new Dictionary<Vector2Int, TreeData[]>();
+	private Dictionary<Vector2Int, TreeChunk[]> TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
 
 	[SerializeField]
-	internal List<TreeData.TreeInfo> Trees;
+	internal List<TreeChunk.TreeInfo> Trees;
 
 	[SerializeField]
 	List<TerrainNoiseModifier> Modifiers;
@@ -172,7 +172,7 @@ public class WorldGen : MonoBehaviour {
 	//TODO Document This Function
     public void BuildWorld()
     {
-		if(Trees == null) { Trees = new List<TreeData.TreeInfo>(); }
+		if(Trees == null) { Trees = new List<TreeChunk.TreeInfo>(); }
 		WorldGenStart.Invoke();
 			
 		//Get 'True Raduis' or Diameter
@@ -215,7 +215,7 @@ public class WorldGen : MonoBehaviour {
 
 		ClearChildren();                //Clear Old Tiles and Trees
 		TreeChanceMap = null;           //Clear Tree Data
-		TreeChunks  = new Dictionary<Vector2Int, TreeData[]>();
+		TreeChunks  = new Dictionary<Vector2Int, TreeChunk[]>();
 
 		//Actually Build the Tiles
 		for (int y = Radius * -1; y <= Radius; y++)
@@ -524,6 +524,7 @@ public class WorldGen : MonoBehaviour {
 	public void BuildTrees(int Tx, int Ty, GameObject tile)
 	{
 		ClearChildren(tile);
+		//Check if TreeChanceMap has been generated.
 		if(TreeChanceMap == null)
 		{
 			TreeChanceMap = new TerrainNoise(Seeds[OctaveCount+1], 20);
@@ -533,27 +534,28 @@ public class WorldGen : MonoBehaviour {
 		minX = TileSize * -0.5f + (Tx * TileSize);
 		minZ = TileSize * -0.5f + (Ty * TileSize);
 
+		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
 
 
 		//Get ALL trees in the Tree Chunks that intercept our bounds
-		TreeData[] Trees = GetTreesinRect(new Rect(minX, minZ, TileSize, TileSize));
-
-		foreach (TreeData t in Trees)
+		TreeChunk[] Trees = GetTreesinRect(TileArea);
+		//Instantiate the trees
+		foreach (TreeChunk t in Trees)
 		{
 			//t.BuildTree(tile);
-			TreeData.TreeInfo _T = t.GetTree();
+			TreeChunk.TreeInfo _T = t.GetTree();
 			GameObject.Instantiate(_T.tree,
 				new Vector3(t.location.x,	GetHeight(t.location.x, t.location.y, getRatio(t.location.x, t.location.y)),	t.location.y),
-				Quaternion.Euler(_T.RotateAll? t.Rot:new Vector3(0,t.Rot.y,0)),
-				tile.transform);
+				Quaternion.Euler(_T.RotateAll? t.Rot:new Vector3(0,t.Rot.y,0)),	
+				tile.transform);	//Parent is the tile.
 		}
 		//Spawn Remaining Trees
 	}
 
-	private TreeData[] GetTreesinRect(Rect area)
+	private TreeChunk[] GetTreesinRect(Rect area)
 	{
 
-		List<TreeData> AllTrees = new List<TreeData>();
+		List<TreeChunk> AllTrees = new List<TreeChunk>();
 		int xMinIndex, xMaxIndex, zMinIndex, zMaxIndex;
 		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(TreeChunkSize);
 		if (area.xMin < 0) { xMinIndex--; }
@@ -569,18 +571,18 @@ public class WorldGen : MonoBehaviour {
 			for(int loopX = xMinIndex; loopX <= xMaxIndex; loopX++)
 			{
 				
-					TreeData[] Chunk;
+					TreeChunk[] Chunk;
 					TreeChunks.TryGetValue(new Vector2Int(loopX, loopZ), out Chunk);
 
 				if (Chunk == null)
 				{
-					List<TreeData> newChunk = new List<TreeData>();
-					float seed = TreeChanceMap.getHeight(loopX +TreeChunkSize*localX, loopZ+TreeChunkSize * localZ, 0.5f);
+					List<TreeChunk> newChunk = new List<TreeChunk>();
+					float seed = TreeChanceMap.getHeight(loopX +TreeChunkSize*localX, loopZ+TreeChunkSize * localZ);
 					System.Random TreeChunk = new System.Random(Mathf.RoundToInt(seed*seed*100));
 					for (int treeIndex = 0; treeIndex < TreeChunkSize * TreeDensity; treeIndex++)
 					{
 							//Debug.Log("New Tree Made!");
-						newChunk.Add(new TreeData(
+						newChunk.Add(new TreeChunk(
 							new Vector2((float)(TreeChunk.NextDouble() * (TreeChunkSize + 1)) + (loopX * TreeChunkSize), (float)(TreeChunk.NextDouble() * (TreeChunkSize + 1)) + (loopZ * TreeChunkSize)),
 							(TreeChunk.Next()),
 							this
@@ -596,8 +598,8 @@ public class WorldGen : MonoBehaviour {
 			}
 		}
 
-		List<TreeData> FixedTrees = new List<TreeData>();
-		foreach(TreeData t in AllTrees)
+		List<TreeChunk> FixedTrees = new List<TreeChunk>();
+		foreach(TreeChunk t in AllTrees)
 		{
 			if (area.Contains(t.location))
 				FixedTrees.Add(t);
@@ -610,8 +612,8 @@ public class WorldGen : MonoBehaviour {
 	public void AddNewTree(GameObject t, bool r)
 	{
 		
-		if(Trees == null) { Trees = new List<TreeData.TreeInfo>(); }
-		TreeData.TreeInfo NTree = new TreeData.TreeInfo
+		if(Trees == null) { Trees = new List<TreeChunk.TreeInfo>(); }
+		TreeChunk.TreeInfo NTree = new TreeChunk.TreeInfo
 		{
 			tree = t,
 			RotateAll = r
@@ -755,7 +757,7 @@ public class WorldGen : MonoBehaviour {
 		{
 			AddNewTree(NewTree, RotateAll);
 		}
-		foreach(TreeData.TreeInfo g in Trees)
+		foreach(TreeChunk.TreeInfo g in Trees)
 		{
 			GUILayout.Label(new GUIContent(g.tree.name+ " "+ g.RotateAll));
 		}
@@ -763,7 +765,7 @@ public class WorldGen : MonoBehaviour {
 		if (sober) {
 			if (GUILayout.Button(new GUIContent("Clear Trees")))
 			{
-				Trees = new List<TreeData.TreeInfo>();
+				Trees = new List<TreeChunk.TreeInfo>();
 			}
 		}
 
