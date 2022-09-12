@@ -1,0 +1,19 @@
+{
+  "name": "com.quiqi.knightgen",
+  "version": "4.0.0",
+  "displayName": "KNight Terrain Gen",
+  "description": "The terrain generation tools for Project KNight",
+  "dependencies": {
+    "com.unity.modules.screencapture": "1.0.0"
+  },
+  "keywords": [
+    "procedural",
+    "generation",
+    "random"
+  ],
+  "author": {
+    "name": "Oggal",
+    "email": "philip.dan.taylor@example.com",
+    "url": "https://www.github.com/Oggal"
+  }
+}

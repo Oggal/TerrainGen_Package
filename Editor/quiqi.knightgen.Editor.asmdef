@@ -1,0 +1,17 @@
+{
+    "name": "quiqi.knightgen.Editor",
+    "references": [
+        "GUID:43b846638ced6d348bb6c5612d0221c1"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
