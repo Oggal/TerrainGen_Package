@@ -54,8 +54,11 @@ public class WorldGen : MonoBehaviour {
 	[Space]
 	[Header("Experimental")]
 	public bool buildTrees = false;
-	public float TreeChunkSize = 500;
-	public float TreeDensity = 1;
+	public float DecorChunkSize = 500;
+	[Range(0,1)]
+	public float DecorDensity = 1;
+	[Min(0)]
+	public int DecorAttempts = 100;
 	private TerrainNoise TreeChanceMap;
 	private Dictionary<Vector2Int, TreeChunk[]> TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
 
@@ -557,13 +560,13 @@ public class WorldGen : MonoBehaviour {
 
 		List<TreeChunk> AllTrees = new List<TreeChunk>();
 		int xMinIndex, xMaxIndex, zMinIndex, zMaxIndex;
-		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(TreeChunkSize);
+		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(DecorChunkSize);
 		if (area.xMin < 0) { xMinIndex--; }
-		xMaxIndex = Mathf.RoundToInt((area.xMax)) / Mathf.RoundToInt(TreeChunkSize);
+		xMaxIndex = Mathf.RoundToInt((area.xMax)) / Mathf.RoundToInt(DecorChunkSize);
 		if(area.xMax < 0) { xMaxIndex--; }
-		zMinIndex = Mathf.RoundToInt((area.yMin)) / Mathf.RoundToInt(TreeChunkSize);
+		zMinIndex = Mathf.RoundToInt((area.yMin)) / Mathf.RoundToInt(DecorChunkSize);
 		if (area.yMin < 0) { zMinIndex--; }
-		zMaxIndex = Mathf.RoundToInt((area.yMax)) / Mathf.RoundToInt(TreeChunkSize);
+		zMaxIndex = Mathf.RoundToInt((area.yMax)) / Mathf.RoundToInt(DecorChunkSize);
 		if (area.yMax < 0) { zMaxIndex--; }
 
 		for(int loopZ = zMinIndex; loopZ <= zMaxIndex; loopZ++)
@@ -577,16 +580,16 @@ public class WorldGen : MonoBehaviour {
 				if (Chunk == null)
 				{
 					List<TreeChunk> newChunk = new List<TreeChunk>();
-					float seed = TreeChanceMap.getHeight(loopX +TreeChunkSize*localX, loopZ+TreeChunkSize * localZ);
+					float seed = TreeChanceMap.getHeight(loopX +DecorChunkSize*localX, loopZ+DecorChunkSize * localZ);
 					System.Random TreeChunk = new System.Random(Mathf.RoundToInt(seed*seed*100));
-					for (int treeIndex = 0; treeIndex < TreeChunkSize * TreeDensity; treeIndex++)
+					for (int treeIndex = 0; treeIndex < DecorChunkSize * DecorDensity; treeIndex++)
 					{
 							//Debug.Log("New Tree Made!");
 						newChunk.Add(new TreeChunk(
-							new Vector2((float)(TreeChunk.NextDouble() * (TreeChunkSize + 1)) + (loopX * TreeChunkSize), (float)(TreeChunk.NextDouble() * (TreeChunkSize + 1)) + (loopZ * TreeChunkSize)),
+							new Vector2((float)(TreeChunk.NextDouble() * (DecorChunkSize + 1)) + (loopX * DecorChunkSize), (float)(TreeChunk.NextDouble() * (DecorChunkSize + 1)) + (loopZ * DecorChunkSize)),
 							(TreeChunk.Next()),
 							this
-							));
+							));	
 					}
 					Chunk = newChunk.ToArray();
 					TreeChunks.Add(new Vector2Int(loopX, loopZ), Chunk);

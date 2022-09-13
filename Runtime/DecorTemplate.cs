@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DecorTemplate : ScriptableObject
 {
-    [SerializeField]Mesh Visual;
+    [SerializeField]Mesh visual;
     
-    [SerializeField]bool Collides = false;
+    [SerializeField]bool collides = false;
 }
