@@ -297,13 +297,13 @@ public class WorldGen : MonoBehaviour {
     {
 		TilesBuilding++;
 		IEnumerator i = BuildMeshSlow(Tx, Ty, m,RunInstant);
-		ClearChildren(m);
-        StartCoroutine(i);
+        StartCoroutine(BuildMeshSlow(Tx,Ty,m,RunInstant));
+		//Should add the coroutine to a list, when the list is empty call the finished event
     }
 
     private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM,bool RunInstant = false)
     {
-		
+		if(HoldsM){ClearChildren(HoldsM);}
         HoldsM.GetComponent<MeshRenderer>().enabled = false;
         Mesh m = HoldsM.GetComponent<MeshFilter>().sharedMesh;
         if (m == null)
@@ -748,36 +748,6 @@ public class WorldGen : MonoBehaviour {
     }
 
 #endregion
-
-
-#if UNITY_EDITOR
-	private GameObject NewTree;
-	private bool RotateAll;
-	private bool sober;
-	public void TreeMenu()
-	{
-		// SerializedObject tree = NewTree;
-		NewTree = EditorGUILayout.ObjectField(new GUIContent("Tree"), NewTree, typeof(GameObject),false) as GameObject;
-		RotateAll = EditorGUILayout.Toggle(new GUIContent("Rotate On All Axis"), RotateAll);
-		if (NewTree != null && GUILayout.Button(new GUIContent("Add Tree To List")))
-		{
-			AddNewTree(NewTree, RotateAll);
-		}
-		foreach(TreeChunk.TreeInfo g in Trees)
-		{
-			GUILayout.Label(new GUIContent(g.tree.name+ " "+ g.RotateAll));
-		}
-		sober = (GUILayout.Toggle(sober,new GUIContent("ARE YOU SOBER???")));
-		if (sober) {
-			if (GUILayout.Button(new GUIContent("Clear Trees")))
-			{
-				Trees = new List<TreeChunk.TreeInfo>();
-			}
-		}
-
-	}
-
-#endif
 
 
 }

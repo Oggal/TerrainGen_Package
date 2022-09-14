@@ -71,7 +71,7 @@ public class WolrdGenInspector : Editor
 			gen.MoveX(true);
 
 
-		gen.TreeMenu();
+		//gen.TreeMenu();
 
 		SceneView.RepaintAll();
     }   
