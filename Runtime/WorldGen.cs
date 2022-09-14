@@ -61,7 +61,7 @@ public class WorldGen : MonoBehaviour {
 	public int DecorAttempts = 100;
 	private TerrainNoise TreeChanceMap;
 	private Dictionary<Vector2Int, TreeChunk[]> TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
-
+	private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
 	[SerializeField]
 	internal List<TreeChunk.TreeInfo> Trees;
 
@@ -172,18 +172,30 @@ public class WorldGen : MonoBehaviour {
 
 #region World Gen
 
+	private void ClearWorldData(){
+		ClearChildren();
+		DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
+	//Center The World
+		localX = 0;
+		localZ = 0;
+
+		TreeChanceMap = null;
+		TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
+	}
+
+
+
 	//TODO Document This Function
     public void BuildWorld()
     {
+		ClearWorldData();
+		
 		if(Trees == null) { Trees = new List<TreeChunk.TreeInfo>(); }
 		WorldGenStart.Invoke();
 			
 		//Get 'True Raduis' or Diameter
         TRadius = Radius * 2 + 1;
-		
-		//Cener The World
-        localX = 0;
-        localZ = 0;
+
 		
 		//If we are not using a preset Seed generate a new one
         if (!UseSeed)
@@ -198,10 +210,8 @@ public class WorldGen : MonoBehaviour {
 
 		Octaves = new TerrainNoise[OctaveCount];
 		
-		
 		//Define the ScaleMap
         ScaleMap = new TerrainNoise(Seed, 3);
-		
 		
 		//Construct the Octaves
         for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
@@ -210,15 +220,9 @@ public class WorldGen : MonoBehaviour {
             Octaves[OctaveIndex] = new TerrainNoise(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
         }
 		
-
 		//Build the Tile Grid
 		Tiles = new GameObject[TRadius * TRadius];  //Define The tiles in code
 
-
-
-		ClearChildren();                //Clear Old Tiles and Trees
-		TreeChanceMap = null;           //Clear Tree Data
-		TreeChunks  = new Dictionary<Vector2Int, TreeChunk[]>();
 
 		//Actually Build the Tiles
 		for (int y = Radius * -1; y <= Radius; y++)
@@ -385,7 +389,7 @@ public class WorldGen : MonoBehaviour {
 		if (!RunInstant)
 			yield return null;
 
-	
+// Build Physics Mesh	
 		m = new Mesh();
 		TSize = P_VertexCount + 1;
 		verts = new Vector3[TSize * TSize];
@@ -451,7 +455,6 @@ public class WorldGen : MonoBehaviour {
 		
 		GameObject tile = new GameObject("TerrainTile_");
         tile.transform.parent = transform;
-
 
         return BuildTile(Tx, Ty, tile);
     }
