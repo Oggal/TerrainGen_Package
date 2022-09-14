@@ -55,9 +55,9 @@ public class WorldGen : MonoBehaviour {
 	[Header("Experimental")]
 	public bool buildTrees = false;
 	public float DecorChunkSize = 500;
-	[Range(0,1)]
+	[Range(0,1),Tooltip("Chance to beat to place Decor")]
 	public float DecorDensity = 1;
-	[Min(0)]
+	[Min(0) ,Tooltip("Number of attempts to place Decor per DecorChunk")]
 	public int DecorAttempts = 100;
 	private TerrainNoise TreeChanceMap;
 	private Dictionary<Vector2Int, TreeChunk[]> TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
