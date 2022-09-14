@@ -24,11 +24,11 @@ public class DecorChunk
         I know we want to pool out decor objects so I'd like to avoid instanciating a bunch of game objects here...
         That being said, gameObjects mean we can start testing quick.
     */
-    public DecorTemplate[] getDecor(Rect _worldSpace){
-        List<DecorTemplate> decorOnTile = new List<DecorTemplate>();
+    public GameObject[] getDecor(Rect _worldSpace){
+        List<GameObject> decorOnTile = new List<GameObject>();
         foreach(KeyValuePair<Vector2,DecorTemplate> decor in decorDict){
             if(_worldSpace.Contains(decor.Key+(tileIndex*worldRef.TileSize))){
-                decorOnTile.Add(decor.Value);
+                decorOnTile.Add(decor.Value.BuildDecorObject(1,decor.Key+(tileIndex*worldRef.TileSize),worldRef));
             }
         }
         return decorOnTile.ToArray();
@@ -40,6 +40,7 @@ public class DecorChunk
         rand = new System.Random(seed);
         for(int i = 0;i<worldRef.DecorAttempts;i++){
             Vector2 pos = new Vector2((float)rand.NextDouble(),(float)rand.NextDouble());
+           // int decorSeed = rand.Next();
             if(rand.NextDouble()>worldRef.DecorDensity){
                 decorDict.Add(pos,new DecorTemplate());//TODO:Actually select a Decor Object.
             }
