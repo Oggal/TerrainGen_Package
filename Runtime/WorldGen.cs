@@ -144,11 +144,6 @@ public class WorldGen : MonoBehaviour {
 			}
 
 		}
-
-		if (false)
-		{
-			//PANIC?
-		}
         
     }
 
@@ -175,12 +170,18 @@ public class WorldGen : MonoBehaviour {
 	private void ClearWorldData(){
 		ClearChildren();
 		DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
-	//Center The World
+		//Center The World
 		localX = 0;
 		localZ = 0;
 
+		//Get 'True Raduis' or Diameter
+        TRadius = Radius * 2 + 1;
+
 		TreeChanceMap = null;
 		TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
+		if(Trees == null) 
+				Trees = new List<TreeChunk.TreeInfo>(); 
+
 	}
 
 
@@ -190,13 +191,9 @@ public class WorldGen : MonoBehaviour {
     {
 		ClearWorldData();
 		
-		if(Trees == null) { Trees = new List<TreeChunk.TreeInfo>(); }
+
 		WorldGenStart.Invoke();
 			
-		//Get 'True Raduis' or Diameter
-        TRadius = Radius * 2 + 1;
-
-		
 		//If we are not using a preset Seed generate a new one
         if (!UseSeed)
             Seed = Random.Range(int.MinValue,int.MaxValue);
@@ -207,9 +204,8 @@ public class WorldGen : MonoBehaviour {
 		Seeds[OctaveCount + 1] = r.Next();
 
 		//Intialize the Octaves
-
 		Octaves = new TerrainNoise[OctaveCount];
-		
+
 		//Define the ScaleMap
         ScaleMap = new TerrainNoise(Seed, 3);
 		
