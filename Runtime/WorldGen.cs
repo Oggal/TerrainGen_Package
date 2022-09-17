@@ -63,6 +63,8 @@ public class WorldGen : MonoBehaviour {
 	private Dictionary<Vector2Int, TreeChunk[]> TreeChunks = new Dictionary<Vector2Int, TreeChunk[]>();
 	private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
 	[SerializeField]
+	public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
+	[SerializeField]
 	internal List<TreeChunk.TreeInfo> Trees;
 
 	[SerializeField]
@@ -495,8 +497,6 @@ public class WorldGen : MonoBehaviour {
     private float GetHeight(float px, float py, float ratio = 0.0f,int LOD = 0)
     {
 
-		
-		
         float output = 0;
         for (int i = OctaveCount-1; i >=LOD ; i--)
         {
@@ -538,9 +538,10 @@ public class WorldGen : MonoBehaviour {
 
 		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
 
-
 		//Get ALL trees in the Tree Chunks that intercept our bounds
-		TreeChunk[] Trees = GetTreesinRect(TileArea);
+		//TreeChunk[] Trees = GetTreesinRect(TileArea);
+		GameObject[] Decor = GetTreesinRect(TileArea);
+/*
 		//Instantiate the trees
 		foreach (TreeChunk t in Trees)
 		{
@@ -551,63 +552,60 @@ public class WorldGen : MonoBehaviour {
 				Quaternion.Euler(_T.RotateAll? t.Rot:new Vector3(0,t.Rot.y,0)),	
 				tile.transform);	//Parent is the tile.
 		}
+		*/
 		//Spawn Remaining Trees
+		foreach( GameObject deco in Decor){
+			deco.transform.SetParent(tile.transform,true);
+		}
 	}
 
-	private TreeChunk[] GetTreesinRect(Rect area)
-	{
+	private void BuildTileDecor(int Tx, int Ty, GameObject tile){
+		ClearChildren(tile);
 
-		List<TreeChunk> AllTrees = new List<TreeChunk>();
+		if(TreeChanceMap == null)
+			TreeChanceMap = new TerrainNoise(Seeds[OctaveCount+1], 20);
+		
+
+	}
+
+	private GameObject[] GetTreesinRect(Rect area)
+	{
+		List<GameObject> AllDecore = new List<GameObject>();
+
 		int xMinIndex, xMaxIndex, zMinIndex, zMaxIndex;
-		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(DecorChunkSize);
+		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(TileSize);
 		if (area.xMin < 0) { xMinIndex--; }
-		xMaxIndex = Mathf.RoundToInt((area.xMax)) / Mathf.RoundToInt(DecorChunkSize);
+		xMaxIndex = Mathf.RoundToInt((area.xMax)) / Mathf.RoundToInt(TileSize);
 		if(area.xMax < 0) { xMaxIndex--; }
-		zMinIndex = Mathf.RoundToInt((area.yMin)) / Mathf.RoundToInt(DecorChunkSize);
+		zMinIndex = Mathf.RoundToInt((area.yMin)) / Mathf.RoundToInt(TileSize);
 		if (area.yMin < 0) { zMinIndex--; }
-		zMaxIndex = Mathf.RoundToInt((area.yMax)) / Mathf.RoundToInt(DecorChunkSize);
+		zMaxIndex = Mathf.RoundToInt((area.yMax)) / Mathf.RoundToInt(TileSize);
 		if (area.yMax < 0) { zMaxIndex--; }
 
-		for(int loopZ = zMinIndex; loopZ <= zMaxIndex; loopZ++)
+		for(int _Z = zMinIndex; _Z <= zMaxIndex; _Z++)
 		{
-			for(int loopX = xMinIndex; loopX <= xMaxIndex; loopX++)
+			for(int _X = xMinIndex; _X <= xMaxIndex; _X++)
 			{
-				
-					TreeChunk[] Chunk;
-					TreeChunks.TryGetValue(new Vector2Int(loopX, loopZ), out Chunk);
-
-				if (Chunk == null)
-				{
-					List<TreeChunk> newChunk = new List<TreeChunk>();
-					float seed = TreeChanceMap.getHeight(loopX +DecorChunkSize*localX, loopZ+DecorChunkSize * localZ);
-					System.Random TreeChunk = new System.Random(Mathf.RoundToInt(seed*seed*100));
-					for (int treeIndex = 0; treeIndex < DecorChunkSize * DecorDensity; treeIndex++)
-					{
-							//Debug.Log("New Tree Made!");
-						newChunk.Add(new TreeChunk(
-							new Vector2((float)(TreeChunk.NextDouble() * (DecorChunkSize + 1)) + (loopX * DecorChunkSize), (float)(TreeChunk.NextDouble() * (DecorChunkSize + 1)) + (loopZ * DecorChunkSize)),
-							(TreeChunk.Next()),
-							this
-							));	
-					}
-					Chunk = newChunk.ToArray();
-					TreeChunks.Add(new Vector2Int(loopX, loopZ), Chunk);
+				Vector2Int chunkIndex = new Vector2Int(_X,_Z);
+					DecorChunk dChunk;
+					
+					DecorChunks.TryGetValue(chunkIndex, out dChunk);
+					
+				if (dChunk == null){
+					dChunk = new DecorChunk(chunkIndex,
+						Mathf.RoundToInt(TreeChanceMap.getHeight(_X,_Z)*chunkIndex.sqrMagnitude)
+						,this);
+					
+					DecorChunks.Add(chunkIndex, dChunk);
 				}
+				AllDecore.AddRange(dChunk.getDecor(area));
 
-				AllTrees.AddRange(Chunk);
-				
-				
 			}
 		}
 
-		List<TreeChunk> FixedTrees = new List<TreeChunk>();
-		foreach(TreeChunk t in AllTrees)
-		{
-			if (area.Contains(t.location))
-				FixedTrees.Add(t);
-		}
 
-		return FixedTrees.ToArray();
+		return AllDecore.ToArray();
+
 
 	}
 

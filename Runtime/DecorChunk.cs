@@ -16,6 +16,7 @@ public class DecorChunk
         decorDict = new Dictionary<Vector2, DecorTemplate>();
         tileIndex = _Index;
         worldRef = _world;
+        Populate();
     }
 
     //TODO: This will return a list of templates with no location Data, Will Need that location data.
@@ -28,7 +29,10 @@ public class DecorChunk
         List<GameObject> decorOnTile = new List<GameObject>();
         foreach(KeyValuePair<Vector2,DecorTemplate> decor in decorDict){
             if(_worldSpace.Contains(decor.Key+(tileIndex*worldRef.TileSize))){
-                decorOnTile.Add(decor.Value.BuildDecorObject(1,decor.Key+(tileIndex*worldRef.TileSize),worldRef));
+                decorOnTile.Add(
+                    decor.Value.BuildDecorObject(1,
+                        (decor.Key+(Vector2)tileIndex)*worldRef.TileSize,
+                        worldRef));
             }
         }
         return decorOnTile.ToArray();
@@ -39,10 +43,10 @@ public class DecorChunk
         //I would love to assume that the random hasn't been used. but we cant.
         rand = new System.Random(seed);
         for(int i = 0;i<worldRef.DecorAttempts;i++){
-            Vector2 pos = new Vector2((float)rand.NextDouble(),(float)rand.NextDouble());
+            Vector2 pos = new Vector2((float)rand.NextDouble()-0.5f,(float)rand.NextDouble()-0.5f);
            // int decorSeed = rand.Next();
             if(rand.NextDouble()>worldRef.DecorDensity){
-                decorDict.Add(pos,new DecorTemplate());//TODO:Actually select a Decor Object.
+                decorDict.Add(pos,worldRef.decorObjects[0]);//TODO:Actually select a Decor Object.
             }
         }
     }
