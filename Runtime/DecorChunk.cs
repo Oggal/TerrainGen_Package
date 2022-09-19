@@ -19,8 +19,7 @@ public class DecorChunk
         Populate();
     }
 
-    //TODO: This will return a list of templates with no location Data, Will Need that location data.
-    /*
+  /*
         So do we ant to return an array of DecorTemplate or do we want to return a diffrent data object array?
         I know we want to pool out decor objects so I'd like to avoid instanciating a bunch of game objects here...
         That being said, gameObjects mean we can start testing quick.
@@ -28,10 +27,10 @@ public class DecorChunk
     public GameObject[] getDecor(Rect _worldSpace){
         List<GameObject> decorOnTile = new List<GameObject>();
         foreach(KeyValuePair<Vector2,DecorTemplate> decor in decorDict){
-            if(_worldSpace.Contains(decor.Key+(tileIndex*worldRef.TileSize))){
+            if(_worldSpace.Contains((decor.Key+((Vector2)tileIndex))*worldRef.DecorChunkSize)){
                 decorOnTile.Add(
                     decor.Value.BuildDecorObject(1,
-                        (decor.Key+(Vector2)tileIndex)*worldRef.TileSize,
+                        (decor.Key+(Vector2)tileIndex)*worldRef.DecorChunkSize,
                         worldRef));
             }
         }

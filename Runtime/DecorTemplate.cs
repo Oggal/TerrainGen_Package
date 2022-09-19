@@ -20,6 +20,7 @@ public class DecorTemplate : ScriptableObject
         Decorbase.transform.SetPositionAndRotation(
             new Vector3(_worldPos.x,_wg.GetHeight(_worldPos.x,_worldPos.y),_worldPos.y),
             Quaternion.identity);
+        Decorbase.name = name + _worldPos;
         return Decorbase;
     }
 }

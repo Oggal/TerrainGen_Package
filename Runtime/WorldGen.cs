@@ -532,7 +532,7 @@ public class WorldGen : MonoBehaviour {
 
 		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
 
-	
+		Debug.Log(TileArea);
 		GameObject[] Decor = GetDecorinRect(TileArea);
 
 
@@ -548,20 +548,21 @@ public class WorldGen : MonoBehaviour {
 		List<GameObject> AllDecore = new List<GameObject>();
 
 		int xMinIndex, xMaxIndex, zMinIndex, zMaxIndex;
-		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(TileSize);
-		if (area.xMin < 0) { xMinIndex--; }
-		xMaxIndex = Mathf.RoundToInt((area.xMax)) / Mathf.RoundToInt(TileSize);
-		if(area.xMax < 0) { xMaxIndex--; }
-		zMinIndex = Mathf.RoundToInt((area.yMin)) / Mathf.RoundToInt(TileSize);
-		if (area.yMin < 0) { zMinIndex--; }
-		zMaxIndex = Mathf.RoundToInt((area.yMax)) / Mathf.RoundToInt(TileSize);
-		if (area.yMax < 0) { zMaxIndex--; }
+		xMinIndex = Mathf.RoundToInt((area.xMin) / DecorChunkSize);
+		//if (area.xMin < 0) { xMinIndex--; }
+		xMaxIndex = Mathf.RoundToInt((area.xMax) / DecorChunkSize);
+		//if(area.xMax < 0) { xMaxIndex--; }
+		zMinIndex = Mathf.RoundToInt((area.yMin) / DecorChunkSize);
+		//if (area.yMin < 0) { zMinIndex--; }
+		zMaxIndex = Mathf.RoundToInt((area.yMax) / DecorChunkSize);
+		//if (area.yMax < 0) { zMaxIndex--; }
 
-		for(int _Z = zMinIndex; _Z <= zMaxIndex; _Z++)
+		for(int _Z = zMinIndex-2; _Z <= zMaxIndex+2; _Z++)
 		{
-			for(int _X = xMinIndex; _X <= xMaxIndex; _X++)
+			for(int _X = xMinIndex-2; _X <= xMaxIndex+2; _X++)
 			{
 				Vector2Int chunkIndex = new Vector2Int(_X,_Z);
+				//Debug.Log(chunkIndex);
 					DecorChunk dChunk;
 					
 					DecorChunks.TryGetValue(chunkIndex, out dChunk);
