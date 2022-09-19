@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: TreeExample
   m_EditorClassIdentifier: 
   visual: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
-  material: {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  material: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   collides: 0
