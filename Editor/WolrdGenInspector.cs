@@ -65,14 +65,6 @@ public class WolrdGenInspector : Editor
         if (GUILayout.Button(new GUIContent("Clear World","Removes all children from the world data object, Clearing the world.")))
             gen.ClearChildren();
 
-		if (GUILayout.Button(new GUIContent("Move West")))
-			gen.MoveX(false);
-		if (GUILayout.Button(new GUIContent("Move East")))
-			gen.MoveX(true);
-
-
-		//gen.TreeMenu();
-
 		SceneView.RepaintAll();
     }   
 
