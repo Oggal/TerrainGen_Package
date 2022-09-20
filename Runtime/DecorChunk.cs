@@ -43,11 +43,10 @@ public class DecorChunk
         rand = new System.Random(seed);
         for(int i = 0;i<worldRef.DecorAttempts;i++){
             Vector2 pos = new Vector2((float)rand.NextDouble()-0.5f,(float)rand.NextDouble()-0.5f);
-           // int decorSeed = rand.Next();
+            int decorSeed = Mathf.RoundToInt(Mathf.Floor((float)rand.NextDouble() * worldRef.decorObjects.Count));
             if(rand.NextDouble()>worldRef.DecorDensity){
-                decorDict.Add(pos,worldRef.decorObjects[0]);//TODO:Actually select a Decor Object.
+                decorDict.Add(pos,worldRef.decorObjects[decorSeed]);
             }
         }
     }
-
 }
