@@ -52,16 +52,19 @@ public class WorldGen : MonoBehaviour {
 
 
 	[Space]
-	[Header("Experimental")]
-	public bool buildTrees = false;
-	public float TreeChunkSize = 500;
-	public float TreeDensity = 1;
-	private TerrainNoise TreeChanceMap;
-	private Dictionary<Vector2Int, TreeData[]> TreeChunks = new Dictionary<Vector2Int, TreeData[]>();
-
+	[Header("Decor Settings")]
+	public bool buildDecor = false;
+	public float DecorChunkSize = 500;
+	[Range(0,1),Tooltip("Chance to beat to place Decor")]
+	public float DecorDensity = 1;
+	[Min(0) ,Tooltip("Number of attempts to place Decor per DecorChunk")]
+	public int DecorAttempts = 100;
+	private TerrainNoise DecorChanceMap;
+	private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
 	[SerializeField]
-	internal List<TreeData.TreeInfo> Trees;
-
+	public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
+	[Space]
+	[Header("Experimental")]
 	[SerializeField]
 	List<TerrainNoiseModifier> Modifiers;
 
@@ -141,11 +144,6 @@ public class WorldGen : MonoBehaviour {
 			}
 
 		}
-
-		if (false)
-		{
-			//PANIC?
-		}
         
     }
 
@@ -169,19 +167,30 @@ public class WorldGen : MonoBehaviour {
 
 #region World Gen
 
+	private void ClearWorldData(){
+		ClearChildren();
+		DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
+		//Center The World
+		localX = 0;
+		localZ = 0;
+
+		//Get 'True Raduis' or Diameter
+        TRadius = Radius * 2 + 1;
+
+		DecorChanceMap = null;
+
+	}
+
+
+
 	//TODO Document This Function
     public void BuildWorld()
     {
-		if(Trees == null) { Trees = new List<TreeData.TreeInfo>(); }
+		ClearWorldData();
+		
+
 		WorldGenStart.Invoke();
 			
-		//Get 'True Raduis' or Diameter
-        TRadius = Radius * 2 + 1;
-		
-		//Cener The World
-        localX = 0;
-        localZ = 0;
-		
 		//If we are not using a preset Seed generate a new one
         if (!UseSeed)
             Seed = Random.Range(int.MinValue,int.MaxValue);
@@ -192,13 +201,10 @@ public class WorldGen : MonoBehaviour {
 		Seeds[OctaveCount + 1] = r.Next();
 
 		//Intialize the Octaves
-
 		Octaves = new TerrainNoise[OctaveCount];
-		
-		
+
 		//Define the ScaleMap
         ScaleMap = new TerrainNoise(Seed, 3);
-		
 		
 		//Construct the Octaves
         for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
@@ -207,15 +213,9 @@ public class WorldGen : MonoBehaviour {
             Octaves[OctaveIndex] = new TerrainNoise(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
         }
 		
-
 		//Build the Tile Grid
 		Tiles = new GameObject[TRadius * TRadius];  //Define The tiles in code
 
-
-
-		ClearChildren();                //Clear Old Tiles and Trees
-		TreeChanceMap = null;           //Clear Tree Data
-		TreeChunks  = new Dictionary<Vector2Int, TreeData[]>();
 
 		//Actually Build the Tiles
 		for (int y = Radius * -1; y <= Radius; y++)
@@ -290,13 +290,13 @@ public class WorldGen : MonoBehaviour {
     {
 		TilesBuilding++;
 		IEnumerator i = BuildMeshSlow(Tx, Ty, m,RunInstant);
-		ClearChildren(m);
-        StartCoroutine(i);
+        StartCoroutine(BuildMeshSlow(Tx,Ty,m,RunInstant));
+		//Should add the coroutine to a list, when the list is empty call the finished event
     }
 
     private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM,bool RunInstant = false)
     {
-		
+		if(HoldsM){ClearChildren(HoldsM);}
         HoldsM.GetComponent<MeshRenderer>().enabled = false;
         Mesh m = HoldsM.GetComponent<MeshFilter>().sharedMesh;
         if (m == null)
@@ -382,7 +382,7 @@ public class WorldGen : MonoBehaviour {
 		if (!RunInstant)
 			yield return null;
 
-	
+// Build Physics Mesh	
 		m = new Mesh();
 		TSize = P_VertexCount + 1;
 		verts = new Vector3[TSize * TSize];
@@ -431,9 +431,9 @@ public class WorldGen : MonoBehaviour {
 		(HoldsM.GetComponent<MeshCollider>() == null ? HoldsM.AddComponent<MeshCollider>() : HoldsM.GetComponent<MeshCollider>()).sharedMesh = m;
 
 
-		if (buildTrees)
+		if (buildDecor)
 		{
-			BuildTrees(Tx, Ty, HoldsM);
+			BuildDecor(Tx, Ty, HoldsM);
 		}
 
 		if (--TilesBuilding == 0)
@@ -448,7 +448,6 @@ public class WorldGen : MonoBehaviour {
 		
 		GameObject tile = new GameObject("TerrainTile_");
         tile.transform.parent = transform;
-
 
         return BuildTile(Tx, Ty, tile);
     }
@@ -475,9 +474,9 @@ public class WorldGen : MonoBehaviour {
 		tile.transform.localScale = Vector3.one;
         tile.transform.position = Vector3.Scale(new Vector3(Tx * TileSize, 0, Ty * TileSize), transform.localScale);
 	
-		if (buildTrees)
+		if (buildDecor)
 		{
-			BuildTrees(Tx,Ty,tile);
+			BuildDecor(Tx,Ty,tile);
 		}
 		
 
@@ -493,8 +492,6 @@ public class WorldGen : MonoBehaviour {
     private float GetHeight(float px, float py, float ratio = 0.0f,int LOD = 0)
     {
 
-		
-		
         float output = 0;
         for (int i = OctaveCount-1; i >=LOD ; i--)
         {
@@ -517,108 +514,73 @@ public class WorldGen : MonoBehaviour {
 
 	/* * * * * * * * * * * *
 	 * 
-	 *		Tree Generation and Placement
+	 *		Decor Generation and Placement
 	 * 
 	 * * * * * * * * * * * */
-#region Trees
-	public void BuildTrees(int Tx, int Ty, GameObject tile)
+#region Decor
+	public void BuildDecor(int Tx, int Ty, GameObject tile)
 	{
 		ClearChildren(tile);
-		if(TreeChanceMap == null)
+		//Check if DecorChanceMap has been generated.
+		if(DecorChanceMap == null)
 		{
-			TreeChanceMap = new TerrainNoise(Seeds[OctaveCount+1], 20);
+			DecorChanceMap = new TerrainNoise(Seeds[OctaveCount+1], 20);
 		}
 		//Find the bounds of the Tile
 		float minX, minZ;
 		minX = TileSize * -0.5f + (Tx * TileSize);
 		minZ = TileSize * -0.5f + (Ty * TileSize);
 
+		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
+
+		GameObject[] Decor = GetDecorinRect(TileArea);
 
 
-		//Get ALL trees in the Tree Chunks that intercept our bounds
-		TreeData[] Trees = GetTreesinRect(new Rect(minX, minZ, TileSize, TileSize));
-
-		foreach (TreeData t in Trees)
-		{
-			//t.BuildTree(tile);
-			TreeData.TreeInfo _T = t.GetTree();
-			GameObject.Instantiate(_T.tree,
-				new Vector3(t.location.x,	GetHeight(t.location.x, t.location.y, getRatio(t.location.x, t.location.y)),	t.location.y),
-				Quaternion.Euler(_T.RotateAll? t.Rot:new Vector3(0,t.Rot.y,0)),
-				tile.transform);
+		//Spawn Remaining Decor
+		foreach( GameObject deco in Decor){
+			deco.transform.SetParent(tile.transform,true);
 		}
-		//Spawn Remaining Trees
 	}
 
-	private TreeData[] GetTreesinRect(Rect area)
+
+	private GameObject[] GetDecorinRect(Rect area)
 	{
+		List<GameObject> AllDecore = new List<GameObject>();
 
-		List<TreeData> AllTrees = new List<TreeData>();
 		int xMinIndex, xMaxIndex, zMinIndex, zMaxIndex;
-		xMinIndex = Mathf.RoundToInt((area.xMin))/Mathf.RoundToInt(TreeChunkSize);
-		if (area.xMin < 0) { xMinIndex--; }
-		xMaxIndex = Mathf.RoundToInt((area.xMax)) / Mathf.RoundToInt(TreeChunkSize);
-		if(area.xMax < 0) { xMaxIndex--; }
-		zMinIndex = Mathf.RoundToInt((area.yMin)) / Mathf.RoundToInt(TreeChunkSize);
-		if (area.yMin < 0) { zMinIndex--; }
-		zMaxIndex = Mathf.RoundToInt((area.yMax)) / Mathf.RoundToInt(TreeChunkSize);
-		if (area.yMax < 0) { zMaxIndex--; }
 
-		for(int loopZ = zMinIndex; loopZ <= zMaxIndex; loopZ++)
+		xMinIndex = Mathf.RoundToInt((area.xMin) / DecorChunkSize);
+		xMaxIndex = Mathf.RoundToInt((area.xMax) / DecorChunkSize);
+		zMinIndex = Mathf.RoundToInt((area.yMin) / DecorChunkSize);
+		zMaxIndex = Mathf.RoundToInt((area.yMax) / DecorChunkSize);
+		
+
+		for(int _Z = zMinIndex; _Z <= zMaxIndex; _Z++)
 		{
-			for(int loopX = xMinIndex; loopX <= xMaxIndex; loopX++)
+			for(int _X = xMinIndex; _X <= xMaxIndex; _X++)
 			{
-				
-					TreeData[] Chunk;
-					TreeChunks.TryGetValue(new Vector2Int(loopX, loopZ), out Chunk);
-
-				if (Chunk == null)
-				{
-					List<TreeData> newChunk = new List<TreeData>();
-					float seed = TreeChanceMap.getHeight(loopX +TreeChunkSize*localX, loopZ+TreeChunkSize * localZ, 0.5f);
-					System.Random TreeChunk = new System.Random(Mathf.RoundToInt(seed*seed*100));
-					for (int treeIndex = 0; treeIndex < TreeChunkSize * TreeDensity; treeIndex++)
-					{
-							//Debug.Log("New Tree Made!");
-						newChunk.Add(new TreeData(
-							new Vector2((float)(TreeChunk.NextDouble() * (TreeChunkSize + 1)) + (loopX * TreeChunkSize), (float)(TreeChunk.NextDouble() * (TreeChunkSize + 1)) + (loopZ * TreeChunkSize)),
-							(TreeChunk.Next()),
-							this
-							));
-					}
-					Chunk = newChunk.ToArray();
-					TreeChunks.Add(new Vector2Int(loopX, loopZ), Chunk);
+				Vector2Int chunkIndex = new Vector2Int(_X,_Z);
+					DecorChunk dChunk;
+					DecorChunks.TryGetValue(chunkIndex, out dChunk);
+					
+				if (dChunk == null){
+					dChunk = new DecorChunk(chunkIndex,
+						Mathf.RoundToInt(DecorChanceMap.getHeight(_X,_Z)*chunkIndex.sqrMagnitude)
+						,this);
+					
+					DecorChunks.Add(chunkIndex, dChunk);
 				}
+				AllDecore.AddRange(dChunk.getDecor(area));
 
-				AllTrees.AddRange(Chunk);
-				
-				
 			}
 		}
 
-		List<TreeData> FixedTrees = new List<TreeData>();
-		foreach(TreeData t in AllTrees)
-		{
-			if (area.Contains(t.location))
-				FixedTrees.Add(t);
-		}
 
-		return FixedTrees.ToArray();
+		return AllDecore.ToArray();
+
 
 	}
 
-	public void AddNewTree(GameObject t, bool r)
-	{
-		
-		if(Trees == null) { Trees = new List<TreeData.TreeInfo>(); }
-		TreeData.TreeInfo NTree = new TreeData.TreeInfo
-		{
-			tree = t,
-			RotateAll = r
-		};
-		Trees.Add(NTree);
-
-	}
 
 
 #endregion
@@ -740,36 +702,6 @@ public class WorldGen : MonoBehaviour {
     }
 
 #endregion
-
-
-#if UNITY_EDITOR
-	private GameObject NewTree;
-	private bool RotateAll;
-	private bool sober;
-	public void TreeMenu()
-	{
-		// SerializedObject tree = NewTree;
-		NewTree = EditorGUILayout.ObjectField(new GUIContent("Tree"), NewTree, typeof(GameObject),false) as GameObject;
-		RotateAll = EditorGUILayout.Toggle(new GUIContent("Rotate On All Axis"), RotateAll);
-		if (NewTree != null && GUILayout.Button(new GUIContent("Add Tree To List")))
-		{
-			AddNewTree(NewTree, RotateAll);
-		}
-		foreach(TreeData.TreeInfo g in Trees)
-		{
-			GUILayout.Label(new GUIContent(g.tree.name+ " "+ g.RotateAll));
-		}
-		sober = (GUILayout.Toggle(sober,new GUIContent("ARE YOU SOBER???")));
-		if (sober) {
-			if (GUILayout.Button(new GUIContent("Clear Trees")))
-			{
-				Trees = new List<TreeData.TreeInfo>();
-			}
-		}
-
-	}
-
-#endif
 
 
 }
