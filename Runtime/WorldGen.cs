@@ -52,7 +52,7 @@ public class WorldGen : MonoBehaviour {
 
 
 	[Space]
-	[Header("Experimental")]
+	[Header("Decor Settings")]
 	public bool buildDecor = false;
 	public float DecorChunkSize = 500;
 	[Range(0,1),Tooltip("Chance to beat to place Decor")]
@@ -63,7 +63,8 @@ public class WorldGen : MonoBehaviour {
 	private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
 	[SerializeField]
 	public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
-
+	[Space]
+	[Header("Experimental")]
 	[SerializeField]
 	List<TerrainNoiseModifier> Modifiers;
 
