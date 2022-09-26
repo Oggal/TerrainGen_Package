@@ -68,4 +68,32 @@ public class WolrdGenInspector : Editor
 		SceneView.RepaintAll();
     }   
 
+	public void OnSceneGUI(){
+		 //Handles.DrawCamera(new Rect(0,0,500,500), Camera.current);
+         //Handles.PositionHandle(Vector3.zero, Quaternion.identity);
+		 WorldGen Gen = target as WorldGen;
+		 if(Gen == null) return;
+
+		 Handles.color = Color.red;
+
+		 Handles.BeginGUI();
+		 if(GUILayout.Button("Build World",GUILayout.MaxWidth(100))){
+			Gen.BuildWorld();
+		 }
+		 Handles.EndGUI();
+	}
+
+	[DrawGizmo(GizmoType.InSelectionHierarchy)]
+	static void DeselectedGizmo(Transform obj,GizmoType gizmoType){
+		
+		WorldGen target = obj.gameObject.GetComponent< WorldGen>();
+		if(target == null) return;
+		Gizmos.color = Color.cyan;
+		Gizmos.DrawWireCube(obj.position,new Vector3((0.5f+target.Radius)*target.TileSize,2,(0.5f+target.Radius)*target.TileSize)*2);
+	
+		foreach( MeshCollider mCol in target.GetComponentsInChildren<MeshCollider>()){
+			Gizmos.DrawMesh(mCol.sharedMesh,mCol.transform.position);
+		}
+	}
+
 }
