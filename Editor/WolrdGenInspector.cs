@@ -27,9 +27,6 @@ public class WolrdGenInspector : Editor
 
 		//Generation Settings
 		EditorGUILayout.LabelField(new GUIContent("Generation Settings"));
-		gen.drawRadius = GUILayout.Toggle(gen.drawRadius, 
-			new GUIContent("Draw Radius", "Draws a Yellow out line of the world and it's tiles"));
-
 		gen.UseSeed = GUILayout.Toggle(gen.UseSeed,
 			new GUIContent("Use Seed", "Forces the generator to use supplied seed inplace of a random one."));
 
@@ -67,5 +64,33 @@ public class WolrdGenInspector : Editor
 
 		SceneView.RepaintAll();
     }   
+
+	public void OnSceneGUI(){
+		 //Handles.DrawCamera(new Rect(0,0,500,500), Camera.current);
+         //Handles.PositionHandle(Vector3.zero, Quaternion.identity);
+		 WorldGen Gen = target as WorldGen;
+		 if(Gen == null) return;
+
+		 Handles.color = Color.red;
+
+		 Handles.BeginGUI();
+		 if(GUILayout.Button("Build World",GUILayout.MaxWidth(100))){
+			Gen.BuildWorld();
+		 }
+		 Handles.EndGUI();
+	}
+
+	[DrawGizmo(GizmoType.InSelectionHierarchy)]
+	static void DeselectedGizmo(Transform obj,GizmoType gizmoType){
+		
+		WorldGen target = obj.gameObject.GetComponent< WorldGen>();
+		if(target == null) return;
+		Gizmos.color = Color.cyan;
+		Gizmos.DrawWireCube(obj.position,new Vector3((0.5f+target.Radius)*target.TileSize,2,(0.5f+target.Radius)*target.TileSize)*2);
+		Gizmos.DrawWireCube(obj.position,new Vector3(target.TileSize * target.Radius,100,target.TileSize * target.Radius));
+		foreach( MeshCollider mCol in target.GetComponentsInChildren<MeshCollider>()){
+			Gizmos.DrawMesh(mCol.sharedMesh,mCol.transform.position);
+		}
+	}
 
 }

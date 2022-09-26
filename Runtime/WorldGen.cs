@@ -7,8 +7,7 @@ using UnityEngine.Events;
 public class WorldGen : MonoBehaviour {
 	public int MaxLOD = 0;
 
-    public bool drawRadius = true;       // if true, Draw a Wireframe grid where the World will be generated.
-	[Space]
+   	[Space]
     [Header("World Data")]
     public bool UseSeed = true;			// if false, will generate a new seed for the world on build
     public int Seed = 0; 
@@ -117,35 +116,6 @@ public class WorldGen : MonoBehaviour {
 		}
     }
     
-    private void OnDrawGizmosSelected()
-    {
-
-		if (drawRadius)
-		{
-			Vector3[] verts = { new Vector3(TileSize * -0.5f, 0, TileSize * -0.5f), new Vector3(TileSize * 0.5f, 0, TileSize * -0.5f), new Vector3(TileSize * -0.5f, 0, TileSize * 0.5f), new Vector3(TileSize * 0.5f, 0, TileSize * 0.5f) };
-			Vector2[] uv = { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) };
-			int[] tri = { 1, 0, 2, 1, 2, 3 };
-
-			Mesh m = new Mesh
-			{
-				vertices = verts,
-				uv = uv,
-				triangles = tri
-			};
-			m.RecalculateNormals();
-			Gizmos.color = Color.yellow;
-			for (int y = Radius * -1; y <= Radius; y++)
-			{
-				for (int x = Radius * -1; x <= Radius; x++)
-				{
-
-					Gizmos.DrawWireMesh(m, Vector3.Scale(transform.localScale, new Vector3(x * TileSize, 0, y * TileSize)), Quaternion.identity, transform.localScale);
-				}
-			}
-
-		}
-        
-    }
 
     public void ClearChildren(GameObject g)
     {

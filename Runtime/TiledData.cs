@@ -14,19 +14,5 @@ public class TiledData : MonoBehaviour {
         }
     }
 
-    public void SpawnTrees()
-    {
-
-    }
-
-	public void OnDrawGizmos()
-	{
-		if (parent.drawRadius)
-		{
-			Gizmos.color = Color.red;
-			Gizmos.DrawMesh(GetComponent<MeshCollider>().sharedMesh, transform.position);
-		}
-		
-	}
 
 }
