@@ -90,7 +90,7 @@ public class WolrdGenInspector : Editor
 		if(target == null) return;
 		Gizmos.color = Color.cyan;
 		Gizmos.DrawWireCube(obj.position,new Vector3((0.5f+target.Radius)*target.TileSize,2,(0.5f+target.Radius)*target.TileSize)*2);
-	
+		Gizmos.DrawWireCube(obj.position,new Vector3(target.TileSize * target.Radius,100,target.TileSize * target.Radius));
 		foreach( MeshCollider mCol in target.GetComponentsInChildren<MeshCollider>()){
 			Gizmos.DrawMesh(mCol.sharedMesh,mCol.transform.position);
 		}
