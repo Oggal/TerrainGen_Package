@@ -27,9 +27,6 @@ public class WolrdGenInspector : Editor
 
 		//Generation Settings
 		EditorGUILayout.LabelField(new GUIContent("Generation Settings"));
-		gen.drawRadius = GUILayout.Toggle(gen.drawRadius, 
-			new GUIContent("Draw Radius", "Draws a Yellow out line of the world and it's tiles"));
-
 		gen.UseSeed = GUILayout.Toggle(gen.UseSeed,
 			new GUIContent("Use Seed", "Forces the generator to use supplied seed inplace of a random one."));
 

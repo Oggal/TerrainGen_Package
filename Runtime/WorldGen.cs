@@ -7,8 +7,7 @@ using UnityEngine.Events;
 public class WorldGen : MonoBehaviour {
 	public int MaxLOD = 0;
 
-    public bool drawRadius = true;       // if true, Draw a Wireframe grid where the World will be generated.
-	[Space]
+   	[Space]
     [Header("World Data")]
     public bool UseSeed = true;			// if false, will generate a new seed for the world on build
     public int Seed = 0; 
