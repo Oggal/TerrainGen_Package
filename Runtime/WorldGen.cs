@@ -85,37 +85,14 @@ public class WorldGen : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update () 
+	{
+		CheckWorldCenter();
 
-		if (Player != null)
-		{
-			if (Player.transform.position.x / (TileSize * transform.localScale.x) > localX + ((float)Radius / 2))
-			{
-				Debug.Log("Player is East!");
-
-				MoveX(true);
-			}
-			if (Player.transform.position.x / (TileSize * transform.localScale.x) < localX - ((float)Radius / 2))
-			{
-				Debug.Log("Player is West!");
-
-				MoveX(false);
-			}
-			if (Player.transform.position.z / (TileSize * transform.localScale.z) > localZ + ((float)Radius / 2))
-			{
-				Debug.Log("Player is North!");
-
-				MoveY(true);
-			}
-			if (Player.transform.position.z / (TileSize * transform.localScale.z) < localZ - ((float)Radius / 2))
-			{
-				Debug.Log("Player is South!");
-
-				MoveY(false);
-			}
-		}
-    }
+	}
     
+
+
 
     public void ClearChildren(GameObject g)
     {
@@ -295,43 +272,10 @@ public class WorldGen : MonoBehaviour {
                     GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly),MaxLOD),
                     Yi);
 #region UV map
-				int xu = x % 4;
-                int yu = y % 4;
-                float u;
-                if (xu > 2)
-                {
-                    xu = (xu - 2) % 3;
-                }
-                else
-                {
-                    xu = xu % 3;
-                }
-                u = xu / 2.0f;
-                float v;
-                if (yu > 2)
-                {
-                    yu = (yu - 2) % 3;
-                }
-                else
-                {
-                    yu = yu % 3;
-                }
-                v = yu / 2.0f;
-
-                uv[id] = new Vector2(Mathf.Abs(u), Mathf.Abs(v));
+                uv[id] = CalcUV(x,y);
 #endregion
 				// Build Triangles
-				if (y < TSize - 1 && x < TSize - 1)
-                {
-                    int T_id = (y * (TSize - 1) + x) * 6;
-                    tri[T_id] = id;
-                    tri[T_id + 1] = id + TSize;
-                    tri[T_id + 2] = id + 1;
-
-                    tri[T_id + 3] = id + 1;
-                    tri[T_id + 4] = id + TSize;
-                    tri[T_id + 5] = id + 1 + TSize;
-                }
+				AddTriangle(x,y,id,TSize,tri);
 				//yield return null;
 			}
 			if(!RunInstant)
@@ -372,17 +316,7 @@ public class WorldGen : MonoBehaviour {
 					Yi);
 
 				// Build Triangles
-				if (y < TSize - 1 && x < TSize - 1)
-				{
-					int T_id = (y * (TSize - 1) + x) * 6;
-					tri[T_id] = id;
-					tri[T_id + 1] = id + TSize;
-					tri[T_id + 2] = id + 1;
-
-					tri[T_id + 3] = id + 1;
-					tri[T_id + 4] = id + TSize;
-					tri[T_id + 5] = id + 1 + TSize;
-				}
+			AddTriangle(x,y,id,TSize,tri);
 				//yield return null;
 			}
 			if (!RunInstant)
@@ -422,7 +356,46 @@ public class WorldGen : MonoBehaviour {
         return BuildTile(Tx, Ty, tile);
     }
 
+	private Vector2 CalcUV(int x,int y)
+	{
+		int xu = x % 4;
+		int yu = y % 4;
+		float u, v;
 
+		if (xu > 2)
+		{
+			xu = (xu - 2) % 3;
+		}
+		else
+		{
+			xu = xu % 3;
+		}
+		u = xu / 2.0f;
+
+		if (yu > 2)
+		{
+			yu = (yu - 2) % 3;
+		}
+		else
+		{
+			yu = yu % 3;
+		}
+		v = yu / 2.0f;
+		return new Vector2 (Mathf.Abs(u),Mathf.Abs(v));
+	}
+	private void AddTriangle(int x, int y, int id, int TSize, int[] tri){
+			if (y < TSize - 1 && x < TSize - 1)
+				{
+					int T_id = (y * (TSize - 1) + x) * 6;
+					tri[T_id] = id;
+					tri[T_id + 1] = id + TSize;
+					tri[T_id + 2] = id + 1;
+
+					tri[T_id + 3] = id + 1;
+					tri[T_id + 4] = id + TSize;
+					tri[T_id + 5] = id + 1 + TSize;
+				}
+	}
 	//TODO
     private GameObject BuildTile(int Tx, int Ty, GameObject tile)
     {
@@ -558,6 +531,38 @@ public class WorldGen : MonoBehaviour {
 #endregion
 
 #region World Control
+
+	private void CheckWorldCenter()
+	{
+
+		if (Player != null)
+		{
+			if (Player.transform.position.x / (TileSize * transform.localScale.x) > localX + ((float)Radius / 2))
+			{
+				Debug.Log("Player is East!");
+
+				MoveX(true);
+			}
+			if (Player.transform.position.x / (TileSize * transform.localScale.x) < localX - ((float)Radius / 2))
+			{
+				Debug.Log("Player is West!");
+
+				MoveX(false);
+			}
+			if (Player.transform.position.z / (TileSize * transform.localScale.z) > localZ + ((float)Radius / 2))
+			{
+				Debug.Log("Player is North!");
+
+				MoveY(true);
+			}
+			if (Player.transform.position.z / (TileSize * transform.localScale.z) < localZ - ((float)Radius / 2))
+			{
+				Debug.Log("Player is South!");
+
+				MoveY(false);
+			}
+		}
+	}
 	public void MoveX(bool t)
     {
         if (t)
