@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenuAttribute(fileName = " New Oggal Noise",menuName ="Terrain Noise/Oggal Noise")]
+[CreateAssetMenuAttribute(fileName = " New Oggal Noise", menuName ="Terrain Noise/Oggal Noise")]
 public class OggalNoise : TerrainNoiseObject
 {
     TerrainNoise myNoise;

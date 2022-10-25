@@ -10,9 +10,9 @@ public class TerrainNoise
 	public int SideSize = 5;
 	Dictionary<int, double> VectorLib = new Dictionary<int, double>();
 
-	public TerrainNoise(object i, int Size = 5)
+	public TerrainNoise(int i, int Size = 5)
 	{
-		Seed = i.GetHashCode();
+		Seed = i;
 		SideSize = Size;
 	}
 
