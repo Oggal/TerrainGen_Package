@@ -19,6 +19,9 @@ public class WorldGen : MonoBehaviour {
     public int OctaveCount = 4;			// Levels for Max Detail World
 	public int PhysOctaveCount = 4;		// DEV Var to test Generating a collison mesh with less layers.(UN-USED)
 
+	[SerializeField, Tooltip("Noise Object to use if none specified")]
+	private TerrainNoiseObject FallbackNoiseObject;
+
     public Material[] mats;
 	public bool UseManyMats = false;
 	[Space]
@@ -58,7 +61,7 @@ public class WorldGen : MonoBehaviour {
 	public float DecorDensity = 1;
 	[Min(0) ,Tooltip("Number of attempts to place Decor per DecorChunk")]
 	public int DecorAttempts = 100;
-	private TerrainNoise DecorChanceMap;
+	private TerrainNoiseObject DecorChanceMap;
 	private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
 	[SerializeField]
 	public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
@@ -73,8 +76,8 @@ public class WorldGen : MonoBehaviour {
 	
     private int[] Seeds;
 
-    private TerrainNoise[] Octaves;
-    private TerrainNoise ScaleMap;
+    [SerializeField]private TerrainNoiseObject[] Octaves;
+    [SerializeField]private TerrainNoiseObject ScaleMap;
 
 	private int TilesBuilding = 0;
 
@@ -148,16 +151,17 @@ public class WorldGen : MonoBehaviour {
 		Seeds[OctaveCount + 1] = r.Next();
 
 		//Intialize the Octaves
-		Octaves = new TerrainNoise[OctaveCount];
+		Octaves = new TerrainNoiseObject[OctaveCount];
 
 		//Define the ScaleMap
-        ScaleMap = new TerrainNoise(Seed, 3);
-		
+        //ScaleMap = new TerrainNoise(Seed, 3);
+		ScaleMap.Intialize(Seed, 3);
 		//Construct the Octaves
         for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
         {
             Seeds[OctaveIndex+1] = r.Next();//Get the Seed for Each Octave
-            Octaves[OctaveIndex] = new TerrainNoise(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
+			PrepareNoise(ref Octaves[OctaveIndex]);
+            Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
         }
 		
 		//Build the Tile Grid
@@ -438,9 +442,9 @@ public class WorldGen : MonoBehaviour {
         float output = 0;
         for (int i = OctaveCount-1; i >=LOD ; i--)
         {
-            output += Octaves[i].getHeight(px, py);
+            output += Octaves[i].getHeight(new Vector2(px, py));
         }
-        output *= Mathf.Abs(ScaleMap.getHeight(px / SmoothingX, py / SmoothingZ));
+        output *= Mathf.Abs(ScaleMap.getHeight(new Vector2(px / SmoothingX, py / SmoothingZ)));
 
 		//This really only needs done if we're close enought to something that modifies terrain.
 		//We could store a list of modifiers and adjust from there.
@@ -466,8 +470,8 @@ public class WorldGen : MonoBehaviour {
 		ClearChildren(tile);
 		//Check if DecorChanceMap has been generated.
 		if(DecorChanceMap == null)
-		{
-			DecorChanceMap = new TerrainNoise(Seeds[OctaveCount+1], 20);
+		{	PrepareNoise(ref DecorChanceMap);
+			DecorChanceMap.Intialize(Seeds[OctaveCount+1], 20);
 		}
 		//Find the bounds of the Tile
 		float minX, minZ;
@@ -508,7 +512,7 @@ public class WorldGen : MonoBehaviour {
 					
 				if (dChunk == null){
 					dChunk = new DecorChunk(chunkIndex,
-						Mathf.RoundToInt(DecorChanceMap.getHeight(_X,_Z)*chunkIndex.sqrMagnitude)
+						Mathf.RoundToInt(DecorChanceMap.getHeight(new Vector2(_X,_Z))*chunkIndex.sqrMagnitude)
 						,this);
 					
 					DecorChunks.Add(chunkIndex, dChunk);
@@ -678,6 +682,12 @@ public class WorldGen : MonoBehaviour {
 
 #endregion
 
+
+private void PrepareNoise(ref TerrainNoiseObject noise)
+{
+	if (noise == null)
+		noise = Instantiate(FallbackNoiseObject);
+}
 
 }
 
