@@ -151,11 +151,11 @@ public class WorldGen : MonoBehaviour {
 		Seeds[OctaveCount + 1] = r.Next();
 
 		//Intialize the Octaves
-		if (Octaves == null)
+		if (Octaves == null || Octaves.Length != OctaveCount)
 			Octaves = new TerrainNoiseObject[OctaveCount];
 
 		//Define the ScaleMap
-        //ScaleMap = new TerrainNoise(Seed, 3);
+		PrepareNoise(ref ScaleMap);
 		ScaleMap.Intialize(Seed, 3);
 		//Construct the Octaves
         for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
