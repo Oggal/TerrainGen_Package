@@ -10,9 +10,9 @@ public class TerrainNoise
 	public int SideSize = 5;
 	Dictionary<int, double> VectorLib = new Dictionary<int, double>();
 
-	public TerrainNoise(object i, int Size = 5)
+	public TerrainNoise(int i, int Size = 5)
 	{
-		Seed = i.GetHashCode();
+		Seed = i;
 		SideSize = Size;
 	}
 
@@ -28,7 +28,8 @@ public class TerrainNoise
 		}
 		else
 		{
-
+			//Need to remove dependance on system.random as it may
+				//not preform ideally on all machines
 			System.Random R1 = new System.Random(index);
 			double O = R1.NextDouble();
 			VectorLib.Add(index, O);
@@ -44,29 +45,37 @@ public class TerrainNoise
 
 	private float getBaseHeight(float x, float y)
 	{
-		int x1 = (((int)x) / SideSize);
-		int y1 = (((int)y) / SideSize);
-		x1 = (x < 0 ? (x1 - 1) * SideSize : x1 * SideSize);
-		y1 = (y < 0 ? (y1 - 1) * SideSize : y1 * SideSize);
-		int x2 = x1 + SideSize;
-		int y2 = y1 + SideSize;
+		//Find four corner points of the grid
+		int rightX = getIndexedPoint(x);
+		int bottomY = getIndexedPoint(y);
+		int leftX = rightX + SideSize;
+		int topY = bottomY + SideSize;
 
-		double v1, v2, v3, v4;
-		v1 = getVector(x1, y1);
-		v2 = getVector(x1, y2);
-		v3 = getVector(x2, y1);
-		v4 = getVector(x2, y2);
-
-
-
+		//Assign Vectors to each point on the grid
+		double bottomRight_VecRadian, topRight_VecRadian, bottomLeft_VecRadian, topLeft_VecRadian;
+		bottomRight_VecRadian = getVector(rightX, bottomY);
+		topRight_VecRadian = getVector(rightX, topY);
+		bottomLeft_VecRadian = getVector(leftX, bottomY);
+		topLeft_VecRadian = getVector(leftX, topY);
+		//Calculate dot products between the corner's vector and relative position of the inquried point.
+		//Since my vectors are stored as radians,convert to positions via sin and cos for the dot product.
 		float d1, d2, d3, d4;
-		d1 = DotProduct(Math.Cos(v1 * 2 * Math.PI), Math.Sin(v1 * 2 * Math.PI), x1 - x, y1 - y);
-		d2 = DotProduct(Math.Cos(v2 * 2 * Math.PI), Math.Sin(v2 * 2 * Math.PI), x1 - x, y2 - y);
-		d3 = DotProduct(Math.Cos(v3 * 2 * Math.PI), Math.Sin(v3 * 2 * Math.PI), x2 - x, y1 - y);
-		d4 = DotProduct(Math.Cos(v4 * 2 * Math.PI), Math.Sin(v4 * 2 * Math.PI), x2 - x, y2 - y);
+		d1 = DotProduct(Math.Cos(bottomRight_VecRadian * 2 * Math.PI), Math.Sin(bottomRight_VecRadian * 2 * Math.PI), rightX - x, bottomY - y);
+		d2 = DotProduct(Math.Cos(topRight_VecRadian * 2 * Math.PI), Math.Sin(topRight_VecRadian * 2 * Math.PI), rightX - x, topY - y);
+		d3 = DotProduct(Math.Cos(bottomLeft_VecRadian * 2 * Math.PI), Math.Sin(bottomLeft_VecRadian * 2 * Math.PI), leftX - x, bottomY - y);
+		d4 = DotProduct(Math.Cos(topLeft_VecRadian * 2 * Math.PI), Math.Sin(topLeft_VecRadian * 2 * Math.PI), leftX - x, topY - y);
 
+		//weighted adverage of the 4 dot products
+		return weightedAverage(						//Between the X's across Y
+			weightedAverage(d1, d3, x - rightX), 	//Across Bottom X's
+			weightedAverage(d2, d4, x - rightX), 	//Across Top X's
+			 y - bottomY);						//Distance Across y
+	}
 
-		return wAdv(wAdv(d1, d3, x - x1), wAdv(d2, d4, x - x1), y - y1);
+	private int getIndexedPoint(float x){
+		int outPoint = (((int)x) / SideSize);
+		outPoint = (x < 0 ? (outPoint-1) : outPoint) * SideSize;
+		return outPoint;
 	}
 
 	private int getID(int x, int y)
@@ -80,7 +89,7 @@ public class TerrainNoise
 		return (float)((x * xi) + (y * yi));
 	}
 
-	private float wAdv(float a1, float a2, float w)
+	private float weightedAverage(float a1, float a2, float w)
 	{
 		w = w / SideSize;
 
