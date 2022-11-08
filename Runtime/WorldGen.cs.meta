@@ -3,7 +3,11 @@ guid: 36959456f8caca24095bb6d13c276999
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - Player: {instanceID: 0}
+  - FallbackNoiseObject: {fileID: 11400000, guid: afbbd13a9f87ef7449d477f53eca8df3,
+      type: 2}
+  - ScaleMap: {fileID: 11400000, guid: afbbd13a9f87ef7449d477f53eca8df3, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
