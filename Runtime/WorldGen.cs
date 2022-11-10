@@ -526,10 +526,7 @@ public class WorldGen : MonoBehaviour {
 
 
 		return AllDecore.ToArray();
-
-
 	}
-
 
 
 #endregion

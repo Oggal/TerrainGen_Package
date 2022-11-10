@@ -28,4 +28,11 @@ public class PrefabPOI : TerrainNoiseModifier
     {
         return Position.y;
     }
+
+    public override GameObject BuildGameObject()
+    {
+        GameObject GO = Instantiate(Prefab);
+        GO.transform.position = Position;
+        return (GO);
+    }
 }
