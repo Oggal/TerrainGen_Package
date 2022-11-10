@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5663158927a98a54a916b89d87f9d7dd, type: 3}
   m_Name: SAMPLE_POI
   m_EditorClassIdentifier: 
-  Position: {x: 0, y: 0, z: 0}
+  Position: {x: 0, y: 20, z: 0}
   Prefab: {fileID: 0}
   innerRadius: 0
-  outerRadius: 0
+  outerRadius: 50
