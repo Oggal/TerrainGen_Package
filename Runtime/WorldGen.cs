@@ -50,8 +50,10 @@ public class WorldGen : MonoBehaviour {
 	
 
 	[Header("World Contents")]
-	public bool UseCityGrid = false;
-
+	[Tooltip("Should the generator check for POI Objects")]
+	public bool SpawnPOIs= false;
+	[SerializeField]
+	List<TerrainNoiseModifier> Modifiers;
 
 	[Space]
 	[Header("Decor Settings")]
@@ -67,8 +69,7 @@ public class WorldGen : MonoBehaviour {
 	public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
 	[Space]
 	[Header("Experimental")]
-	[SerializeField]
-	List<TerrainNoiseModifier> Modifiers;
+
 
 
     private int TRadius;
@@ -202,7 +203,7 @@ public class WorldGen : MonoBehaviour {
     private float getRatio(float pX,float pY,out float height)
     {
 		height = 0;
-		if (UseCityGrid)
+		if (SpawnPOIs)
 		{
 			float ratio = 0;
 			foreach(TerrainNoiseModifier TNM in Modifiers)
@@ -221,7 +222,7 @@ public class WorldGen : MonoBehaviour {
 	private float getRatio(float pX, float pY)
 	{
 		
-		if (UseCityGrid)
+		if (SpawnPOIs)
 		{
 			float ratio = 0;
 			foreach (TerrainNoiseModifier TNM in Modifiers)
@@ -242,7 +243,7 @@ public class WorldGen : MonoBehaviour {
     {
 		TilesBuilding++;
 		IEnumerator i = BuildMeshSlow(Tx, Ty, m,RunInstant);
-        StartCoroutine(BuildMeshSlow(Tx,Ty,m,RunInstant));
+        StartCoroutine(i);
 		//Should add the coroutine to a list, when the list is empty call the finished event
     }
 

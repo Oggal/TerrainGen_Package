@@ -39,7 +39,7 @@ public class WolrdGenInspector : Editor
 
 		//POI and City Placement Options
 		cityInfo =EditorGUILayout.BeginToggleGroup("Place Cities", cityInfo);
-		gen.UseCityGrid = GUILayout.Toggle(gen.UseCityGrid,
+		gen.SpawnPOIs = GUILayout.Toggle(gen.SpawnPOIs,
 			new GUIContent("Use Grid Method", "Places Cities on a fixed Infinte Grid"));
 		EditorGUILayout.EndToggleGroup();
 
