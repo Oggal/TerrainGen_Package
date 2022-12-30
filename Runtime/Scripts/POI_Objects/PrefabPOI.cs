@@ -35,4 +35,9 @@ public class PrefabPOI : TerrainNoiseModifier
         GO.transform.position = Position;
         return (GO);
     }
+
+    public Vector3 GetPosition()
+    {
+        return Position;
+    }
 }

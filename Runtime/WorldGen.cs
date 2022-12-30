@@ -54,6 +54,7 @@ public class WorldGen : MonoBehaviour {
 	public bool SpawnPOIs= false;
 	[SerializeField]
 	List<TerrainNoiseModifier> Modifiers;
+	public TerrainNoiseModifier[] Mods { get { return Modifiers.ToArray(); } }
 
 	[Space]
 	[Header("Decor Settings")]
@@ -478,8 +479,8 @@ public class WorldGen : MonoBehaviour {
 		}
 		//Find the bounds of the Tile
 		float minX, minZ;
-		minX = TileSize * -0.5f + (Tx * TileSize);
-		minZ = TileSize * -0.5f + (Ty * TileSize);
+		minX = ((Tx - 0.5f) * TileSize);
+		minZ = ((Ty - 0.5f) * TileSize);
 
 		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
 
