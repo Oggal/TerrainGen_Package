@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SAMPLE_POI
   m_EditorClassIdentifier: 
   Position: {x: 0, y: 20, z: 0}
-  Prefab: {fileID: 0}
-  innerRadius: 0
+  Prefab: {fileID: 1352750506368560322, guid: d4c646a13b9a1e94c9f572fd38a534d3, type: 3}
+  innerRadius: 10
   outerRadius: 50
