@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5663158927a98a54a916b89d87f9d7dd, type: 3}
-  m_Name: SAMPLE_POI
+  m_Name: SpawnPlatform
   m_EditorClassIdentifier: 
-  Position: {x: 0, y: 20, z: 0}
-  Prefab: {fileID: 1352750506368560322, guid: d4c646a13b9a1e94c9f572fd38a534d3, type: 3}
-  innerRadius: 10
+  Position: {x: 0, y: 0, z: 0}
+  Prefab: {fileID: 3071509570050475837, guid: c3c180fc16616994c912c0bbbd65a043, type: 3}
+  innerRadius: 5
   outerRadius: 50

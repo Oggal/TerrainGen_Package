@@ -34,8 +34,6 @@ public class DecorChunk
                         worldRef));
             }
         }
-        if (worldRef.SpawnPOIs)
-            decorOnTile.AddRange(getPOI(_worldSpace));
 
         return decorOnTile.ToArray();
     }
@@ -46,7 +44,7 @@ public class DecorChunk
         rand = new System.Random(seed);
         //Fill a square
         for(int i = 0;i<worldRef.DecorAttempts;i++){
-            Vector2 pos = new Vector2((float)rand.NextDouble(),(float)rand.NextDouble());     //Vector2 ([-0.5,0.5],[-0.5,0.5])
+            Vector2 pos = new Vector2((float)rand.NextDouble(),(float)rand.NextDouble());     //Vector2 ([0,1],[0,1])
             int decorSeed = Mathf.RoundToInt(Mathf.Floor((float)rand.NextDouble() * worldRef.decorObjects.Count));
             if(rand.NextDouble()>worldRef.DecorDensity){
                 decorDict.Add(pos,worldRef.decorObjects[decorSeed]);
@@ -54,22 +52,4 @@ public class DecorChunk
         }
     }
 
-    public GameObject[] getPOI(Rect _worldSpace)
-    {
-        List<GameObject> poi_OnTile = new List<GameObject>();
-        foreach(TerrainNoiseModifier tMod in worldRef.Mods)
-        {
-            if(tMod is PrefabPOI poi)
-            {
-                Vector3 poiPos = poi.GetPosition();
-                GameObject obj = null;
-                if (_worldSpace.Contains(new Vector2(poiPos.x, poiPos.z)))
-                    obj = poi.BuildGameObject();
-                if(obj != null)
-                    poi_OnTile.Add(obj);
-            }
-        }
-
-        return poi_OnTile.ToArray();
-    }
 }

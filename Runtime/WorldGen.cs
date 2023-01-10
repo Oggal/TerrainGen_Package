@@ -201,7 +201,7 @@ public class WorldGen : MonoBehaviour {
 	}
 
 
-    private float getRatio(float pX,float pY,out float height)
+    private float getRatio(float pX, float pY, out float height)
     {
 		height = 0;
 		if (SpawnPOIs)
@@ -240,7 +240,7 @@ public class WorldGen : MonoBehaviour {
 	}
 
 
-	private void UpdateMesh(int Tx, int Ty, GameObject m,bool RunInstant = false)
+	private void UpdateMesh(int Tx, int Ty, GameObject m, bool RunInstant = false)
     {
 		TilesBuilding++;
 		IEnumerator i = BuildMeshSlow(Tx, Ty, m,RunInstant);
@@ -248,7 +248,7 @@ public class WorldGen : MonoBehaviour {
 		//Should add the coroutine to a list, when the list is empty call the finished event
     }
 
-    private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM,bool RunInstant = false)
+    private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM, bool RunInstant = false)
     {
 		if(HoldsM){ClearChildren(HoldsM);}
         HoldsM.GetComponent<MeshRenderer>().enabled = false;
@@ -272,8 +272,8 @@ public class WorldGen : MonoBehaviour {
             for (int x = 0; x < TSize; x++)
             {
                 int id = y * TSize + x;
-                float Xi = (x*VertDis) - (TileSize / 2);
-                float Yi = (y*VertDis) - (TileSize / 2);
+                float Xi = (x  *VertDis) - (TileSize / 2);
+                float Yi = (y * VertDis) - (TileSize / 2);
                 verts[id] = new Vector3(
                     Xi,
                     GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly),MaxLOD),
@@ -319,7 +319,7 @@ public class WorldGen : MonoBehaviour {
 				float Yi = (y * VertDis) - (TileSize / 2);
 				verts[id] = new Vector3(
 					Xi,
-					GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly),PhysOctaveCount),
+					GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly), PhysOctaveCount),
 					Yi);
 
 				// Build Triangles
@@ -342,7 +342,7 @@ public class WorldGen : MonoBehaviour {
 		(HoldsM.GetComponent<MeshCollider>() == null ? HoldsM.AddComponent<MeshCollider>() : HoldsM.GetComponent<MeshCollider>()).sharedMesh = m;
 
 
-		if (buildDecor)
+		if (buildDecor || SpawnPOIs)
 		{
 			BuildDecor(Tx, Ty, HoldsM);
 		}
@@ -363,7 +363,7 @@ public class WorldGen : MonoBehaviour {
         return BuildTile(Tx, Ty, tile);
     }
 
-	private Vector2 CalcUV(int x,int y)
+	private Vector2 CalcUV(int x, int y)
 	{
 		int xu = x % 4;
 		int yu = y % 4;
@@ -424,7 +424,7 @@ public class WorldGen : MonoBehaviour {
 		tile.transform.localScale = Vector3.one;
         tile.transform.position = Vector3.Scale(new Vector3(Tx * TileSize, 0, Ty * TileSize), transform.localScale);
 	
-		if (buildDecor)
+		if (buildDecor || SpawnPOIs)
 		{
 			BuildDecor(Tx,Ty,tile);
 		}
@@ -439,7 +439,7 @@ public class WorldGen : MonoBehaviour {
 	}
 
 
-    private float GetHeight(float px, float py, float ratio = 0.0f,int LOD = 0)
+    private float GetHeight(float px, float py, float ratio = 0.0f, int LOD = 0)
     {
 
         float output = 0;
@@ -483,14 +483,38 @@ public class WorldGen : MonoBehaviour {
 		minZ = ((Ty - 0.5f) * TileSize);
 
 		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
+		List<GameObject> Decor = new List<GameObject>();
+		if (buildDecor)
+			Decor.AddRange(GetDecorinRect(TileArea));
+		if (SpawnPOIs)
+			Decor.AddRange(GetPOIinRect(TileArea));
+		
+	
+			foreach (GameObject deco in Decor)
+			{
+				deco.transform.SetParent(tile.transform, true);
+			}
+		
+	}
 
-		GameObject[] Decor = GetDecorinRect(TileArea);
-
-
-		//Spawn Remaining Decor
-		foreach( GameObject deco in Decor){
-			deco.transform.SetParent(tile.transform,true);
+	private GameObject[] GetPOIinRect(Rect area)
+    {
+		List<GameObject> poi_OnTile = new List<GameObject>();
+		foreach (TerrainNoiseModifier tMod in Mods)
+		{
+			if (tMod is PrefabPOI poi)
+			{
+				Vector3 poiPos = poi.GetPosition();
+				GameObject obj = null;
+				if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
+					obj = poi.BuildGameObject();
+				if (obj != null)
+					poi_OnTile.Add(obj);
+				poi.OnSpawned.Invoke();
+			}
 		}
+
+		return poi_OnTile.ToArray();
 	}
 
 
