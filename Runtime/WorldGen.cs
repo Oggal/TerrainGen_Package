@@ -272,7 +272,7 @@ public class WorldGen : MonoBehaviour {
             for (int x = 0; x < TSize; x++)
             {
                 int id = y * TSize + x;
-                float Xi = (x  *VertDis) - (TileSize / 2);
+                float Xi = (x * VertDis) - (TileSize / 2);
                 float Yi = (y * VertDis) - (TileSize / 2);
                 verts[id] = new Vector3(
                     Xi,
