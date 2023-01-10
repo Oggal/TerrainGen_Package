@@ -12,6 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5663158927a98a54a916b89d87f9d7dd, type: 3}
   m_Name: SAMPLE_POI
   m_EditorClassIdentifier: 
+  OnSpawned:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDespawned:
+    m_PersistentCalls:
+      m_Calls: []
   Position: {x: 60, y: 20, z: 30}
   Prefab: {fileID: 8759102681163810373, guid: 41b14526daeac46408b200b749b4234d, type: 3}
   innerRadius: 20

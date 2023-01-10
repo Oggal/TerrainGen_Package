@@ -12,6 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5663158927a98a54a916b89d87f9d7dd, type: 3}
   m_Name: SpawnPlatform
   m_EditorClassIdentifier: 
+  OnSpawned:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDespawned:
+    m_PersistentCalls:
+      m_Calls: []
   Position: {x: 0, y: 0, z: 0}
   Prefab: {fileID: 3071509570050475837, guid: c3c180fc16616994c912c0bbbd65a043, type: 3}
   innerRadius: 5

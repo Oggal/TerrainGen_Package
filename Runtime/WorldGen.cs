@@ -510,8 +510,9 @@ public class WorldGen : MonoBehaviour {
 					obj = poi.BuildGameObject();
 				if (obj != null)
 					poi_OnTile.Add(obj);
-				poi.OnSpawned.Invoke();
 			}
+				tMod.OnSpawned?.Invoke();
+
 		}
 
 		return poi_OnTile.ToArray();
