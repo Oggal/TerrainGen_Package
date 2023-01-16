@@ -12,7 +12,7 @@ public class PrefabPOI : TerrainNoiseModifier
 
     public override float GetRatio(float pointX, float pointY)
     {
-        float distance = Vector2.Distance(new Vector2(Position.x,Position.z), new Vector2(pointX, pointY));
+        float distance = Vector2.Distance(new Vector2(Position.x, Position.z), new Vector2(pointX, pointY));
         if (distance > outerRadius + innerRadius)
         {
             return 0;
@@ -21,7 +21,7 @@ public class PrefabPOI : TerrainNoiseModifier
         {
             return 1;
         }
-        return 1-(distance - innerRadius) / (outerRadius);
+        return 1 - (distance - innerRadius) / (outerRadius);
     }
 
     public override float GetTargetHeight(float pointX, float pointY)
