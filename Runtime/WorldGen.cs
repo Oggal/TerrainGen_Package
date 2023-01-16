@@ -81,7 +81,7 @@ public class WorldGen : MonoBehaviour {
     [SerializeField]private TerrainNoiseObject[] Octaves;
     [SerializeField]private TerrainNoiseObject ScaleMap;
 
-	private int TilesBuilding = 0;
+	private List<IEnumerator> TilesBuilding = new List<IEnumerator>();
 
     public void Start()
     {
@@ -200,7 +200,6 @@ public class WorldGen : MonoBehaviour {
 		}
 	}
 
-
     private float getRatio(float pX, float pY, out float height)
     {
 		height = 0;
@@ -239,12 +238,12 @@ public class WorldGen : MonoBehaviour {
 		return 0.0f;
 	}
 
-
 	private void UpdateMesh(int Tx, int Ty, GameObject m, bool RunInstant = false)
     {
-		TilesBuilding++;
+		
 		IEnumerator i = BuildMeshSlow(Tx, Ty, m,RunInstant);
-        StartCoroutine(i);
+		TilesBuilding.Add(i);
+		StartCoroutine(i);
 		//Should add the coroutine to a list, when the list is empty call the finished event
     }
 
@@ -346,10 +345,14 @@ public class WorldGen : MonoBehaviour {
 		{
 			BuildDecor(Tx, Ty, HoldsM);
 		}
-
-		if (--TilesBuilding == 0)
+		TilesBuilding.RemoveAt(0);
+		if (TilesBuilding.Count > 0)
 		{
+			Debug.Log(TilesBuilding.Count);
+		} else {
 			WorldGenFinish.Invoke();
+			Debug.Log(TilesBuilding.Count);
+
 		}
 
 	}
