@@ -278,7 +278,7 @@ public class WorldGen : MonoBehaviour {
                     GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly),MaxLOD),
                     Yi);
 #region UV map
-                uv[id] = CalcUV(x,y);
+                uv[id] = gridUV(x,y);
 #endregion
 				// Build Triangles
 				AddTriangle(x,y,id,TSize,tri);
@@ -392,6 +392,11 @@ public class WorldGen : MonoBehaviour {
 		}
 		v = yu / 2.0f;
 		return new Vector2 (Mathf.Abs(u),Mathf.Abs(v));
+	}
+	
+	private Vector2 gridUV(int x, int y)
+	{
+		return new Vector2((float)x / V_VertexCount, (float)y / V_VertexCount);
 	}
 	private void AddTriangle(int x, int y, int id, int TSize, int[] tri){
 			if (y < TSize - 1 && x < TSize - 1)
