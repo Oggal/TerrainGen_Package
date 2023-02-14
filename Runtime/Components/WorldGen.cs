@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using UnityEngine.Events;
 
 public class WorldGen : MonoBehaviour {
@@ -45,9 +44,12 @@ public class WorldGen : MonoBehaviour {
 	[Header("Events")]
 	[Tooltip("Called at Start of Initial World Generation")]
 	public UnityEvent WorldGenStart;
+	
 	[Tooltip("Called When WorldGen Finishes")]
 	public UnityEvent WorldGenFinish;
-	
+
+	[Tooltip("Called before World Generation starts")]
+	public UnityEvent WorldGenPreInit;
 
 	[Header("World Contents")]
 	[Tooltip("Should the generator check for POI Objects")]
@@ -128,65 +130,68 @@ public class WorldGen : MonoBehaviour {
 
 		//Get 'True Raduis' or Diameter
         TRadius = Radius * 2 + 1;
-
 		DecorChanceMap = null;
-
 	}
 
-
-
-	//TODO Document This Function
     public void BuildWorld()
     {
-		ClearWorldData();
-		
+        ClearWorldData();
 
-		WorldGenStart.Invoke();
-			
-		//If we are not using a preset Seed generate a new one
-        if (!UseSeed)
-            Seed = Random.Range(int.MinValue,int.MaxValue);
-		Seeds = new int[OctaveCount + 2];
-		Seeds[0] = Seed;
-			
-		System.Random r = new System.Random(Seed);  //Create the Random object to be used
-		Seeds[OctaveCount + 1] = r.Next();
+        WorldGenStart.Invoke();
 
-		//Intialize the Octaves
-		if (Octaves == null || Octaves.Length != OctaveCount)
-			Octaves = new TerrainNoiseObject[OctaveCount];
+        Init_Seeds();
 
-		//Define the ScaleMap
-		PrepareNoise(ref ScaleMap);
-		ScaleMap.Intialize(Seed, 3);
-		//Construct the Octaves
-        for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
-        {
-            Seeds[OctaveIndex+1] = r.Next();//Get the Seed for Each Octave
-			PrepareNoise(ref Octaves[OctaveIndex]);
-            Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
-        }
-		
-		//Build the Tile Grid
-		Tiles = new GameObject[TRadius * TRadius];  //Define The tiles in code
+        //Build the Tile Grid
+        Init_Tiles();
+    }
 
 
-		//Actually Build the Tiles
-		for (int y = Radius * -1; y <= Radius; y++)
+    private void Init_Tiles()
+    {
+        Tiles = new GameObject[TRadius * TRadius];  //Define The tiles in code
+
+        //Actually Build the Tiles
+        for (int y = Radius * -1; y <= Radius; y++)
         {
             for (int x = Radius * -1; x <= Radius; x++)
             {
-				int id = (Radius - y) * TRadius + (x + Radius);
+                int id = (Radius - y) * TRadius + (x + Radius);
 
-				Tiles[id] = BuildTile(x, y);
-				Tiles[id].name += id;
+                Tiles[id] = BuildTile(x, y);
+                Tiles[id].name += id;
             }
         }
-		//WorldGenFinish.Invoke();
-
     }
 
-	private void BuildMesh(int Tx, int Ty, GameObject HoldsMesh)
+    private void Init_Seeds()
+    {
+        //If we are not using a preset Seed generate a new one
+        if (!UseSeed)
+            Seed = Random.Range(int.MinValue, int.MaxValue);
+        Seeds = new int[OctaveCount + 2];
+        Seeds[0] = Seed;
+		//Create the Random object to be used
+        System.Random r = new System.Random(Seed);
+        Seeds[OctaveCount + 1] = r.Next();
+
+        //Intialize the Octaves
+        if (Octaves == null || Octaves.Length != OctaveCount)
+            Octaves = new TerrainNoiseObject[OctaveCount];
+
+        //Define the ScaleMap
+        PrepareNoise(ref ScaleMap);
+        ScaleMap.Intialize(Seed, 3);
+        //Construct the Octaves
+        for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
+        {	
+			//Get the Seed for Each Octave
+            Seeds[OctaveIndex + 1] = r.Next();
+            PrepareNoise(ref Octaves[OctaveIndex]);
+            Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
+        }
+    }
+
+    private void BuildMesh(int Tx, int Ty, GameObject HoldsMesh)
 	{
 		if (Application.isPlaying)
 		{
@@ -510,15 +515,13 @@ public class WorldGen : MonoBehaviour {
 		List<GameObject> poi_OnTile = new List<GameObject>();
 		foreach (TerrainNoiseModifier tMod in Mods)
 		{
-			if (tMod is PrefabPOI poi)
-			{
-				Vector3 poiPos = poi.GetPosition();
+				Vector3 poiPos = tMod.GetPosition();
 				GameObject obj = null;
 				if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
-					obj = poi.BuildGameObject();
+					obj = tMod.BuildGameObject();
 				if (obj != null)
 					poi_OnTile.Add(obj);
-			}
+			
 				tMod.OnSpawned?.Invoke();
 
 		}

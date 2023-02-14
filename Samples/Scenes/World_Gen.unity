@@ -153,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxLOD: 0
   UseSeed: 0
-  Seed: -1406487180
+  Seed: -1976946103
   BuildOnStart: 1
   Player: {fileID: 0}
   OctaveCount: 4
@@ -199,8 +199,7 @@ MonoBehaviour:
         m_CallState: 2
   SpawnPOIs: 1
   Modifiers:
-  - {fileID: 11400000, guid: 2f9e89be3c05eb14ea0afbbc37aea2ab, type: 2}
-  - {fileID: 11400000, guid: 8a7862cf316a4a34082ba2ef0a18841a, type: 2}
+  - {fileID: 11400000, guid: 5be6e31558a9fc449850d2d51e96ea55, type: 2}
   buildDecor: 0
   DecorChunkSize: 150
   DecorDensity: 0.953

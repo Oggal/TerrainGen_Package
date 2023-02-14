@@ -9,16 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5663158927a98a54a916b89d87f9d7dd, type: 3}
-  m_Name: SAMPLE_POI
+  m_Script: {fileID: 11500000, guid: 2d1c69218a0da7f4cb09388859e171c9, type: 3}
+  m_Name: Spawn_Plarform
   m_EditorClassIdentifier: 
+  Position: {x: 0, y: 0, z: 0}
+  Prefab: {fileID: 3071509570050475837, guid: c3c180fc16616994c912c0bbbd65a043, type: 3}
+  innerRadius: 2.5
+  outerRadius: 10
   OnSpawned:
     m_PersistentCalls:
       m_Calls: []
   OnDespawned:
     m_PersistentCalls:
       m_Calls: []
-  Position: {x: 60, y: 20, z: 30}
-  Prefab: {fileID: 8759102681163810373, guid: 41b14526daeac46408b200b749b4234d, type: 3}
-  innerRadius: 20
-  outerRadius: 1

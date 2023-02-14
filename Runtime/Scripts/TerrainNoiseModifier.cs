@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+
 
 [CreateAssetMenuAttribute(fileName = "New POI", menuName ="Terrain Noise/Modifiers/POI")]
-public class PrefabPOI : TerrainNoiseModifier
+public class TerrainNoiseModifier : ScriptableObject
 {
-    
-    [SerializeField] Vector3 Position;
-    [SerializeField] GameObject Prefab;
-    [SerializeField] float innerRadius, outerRadius;
+    [SerializeField] protected Vector3 Position;
+    [SerializeField] protected GameObject Prefab;
+    [SerializeField] protected float innerRadius, outerRadius;
 
-    public override float GetRatio(float pointX, float pointY)
+
+    public virtual float GetRatio(float pointX, float pointY)
     {
         float distance = Vector2.Distance(new Vector2(Position.x, Position.z), new Vector2(pointX, pointY));
         if (distance > outerRadius + innerRadius)
@@ -23,21 +25,27 @@ public class PrefabPOI : TerrainNoiseModifier
         }
         return 1 - (distance - innerRadius) / (outerRadius);
     }
-
-    public override float GetTargetHeight(float pointX, float pointY)
+    public virtual float GetTargetHeight(float pointX, float pointY)
     {
         return Position.y;
     }
-
-    public override GameObject BuildGameObject()
+    public virtual GameObject BuildGameObject()
     {
+        if(Prefab == null)
+            return null;
         GameObject GO = Instantiate(Prefab);
         GO.transform.position = Position;
         return (GO);
     }
 
-    public Vector3 GetPosition()
+    public virtual Vector3 GetPosition()
     {
         return Position;
     }
+
+    public virtual void Pregeneration() { }
+
+    public UnityEvent OnSpawned;
+    public UnityEvent OnDespawned;
+
 }
