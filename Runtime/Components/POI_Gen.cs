@@ -9,14 +9,15 @@ public class POI_Gen : MonoBehaviour
     public uint worldResolution = 100;
     public uint cityCount = 5;
     
+    [SerializeField]
     WorldGen generator;
     
     // Start is called before the first frame update
-    void OnEnabled()
+    void OnEnable()
     {
         if (generator == null)
             generator = GetComponent<WorldGen>();
-        generator.WorldGenPreInit.AddListener(Gen_POIs);
+        generator.WorldGenPreInit.AddListener(this.Gen_POIs);
     }
 
     // Update is called once per frame
@@ -25,13 +26,23 @@ public class POI_Gen : MonoBehaviour
         
     }
 
-    public void Gen_POIs()
+    public void Gen_POIs(int seed)
     {
         List<TerrainNoiseModifier> NewMods = new List<TerrainNoiseModifier>();
+        TerrainNoiseModifier mod = null;
+        System.Random rand = new System.Random(seed);
         for(int i = 0; i < cityCount; i++)
         {
-            TerrainNoiseModifier city_obj = new TerrainNoiseModifier();
+            Debug.Log("QUICK BATMAN! Make a place!");
+            mod  = ScriptableObject.CreateInstance<TerrainNoiseModifier>();
+            float x,y;
+            x = (float)rand.NextDouble() * 2 * worldResolution;
+            y = (float)rand.NextDouble() * 2 * worldResolution;
+            mod.Position = new Vector3(x,generator.GetHeight(x,y),y);
+            mod.innerRadius = 5;
+            NewMods.Add(mod);
         }
+        generator.ProcMods.AddRange(NewMods);
     }
 
 }

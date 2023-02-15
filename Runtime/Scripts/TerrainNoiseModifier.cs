@@ -7,9 +7,9 @@ using UnityEngine.Events;
 [CreateAssetMenuAttribute(fileName = "New POI", menuName ="Terrain Noise/Modifiers/POI")]
 public class TerrainNoiseModifier : ScriptableObject
 {
-    [SerializeField] protected Vector3 Position;
-    [SerializeField] protected GameObject Prefab;
-    [SerializeField] protected float innerRadius, outerRadius;
+    public Vector3 Position;
+    public GameObject Prefab;
+    public float innerRadius, outerRadius;
 
 
     public virtual float GetRatio(float pointX, float pointY)
@@ -29,7 +29,7 @@ public class TerrainNoiseModifier : ScriptableObject
     {
         return Position.y;
     }
-    public virtual GameObject BuildGameObject()
+    public virtual GameObject GetGameObject()
     {
         if(Prefab == null)
             return null;

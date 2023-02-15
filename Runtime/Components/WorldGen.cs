@@ -49,14 +49,21 @@ public class WorldGen : MonoBehaviour {
 	public UnityEvent WorldGenFinish;
 
 	[Tooltip("Called before World Generation starts")]
-	public UnityEvent WorldGenPreInit;
+	public UnityEvent<int> WorldGenPreInit;
 
 	[Header("World Contents")]
 	[Tooltip("Should the generator check for POI Objects")]
 	public bool SpawnPOIs= false;
 	[SerializeField]
 	List<TerrainNoiseModifier> Modifiers;
-	public TerrainNoiseModifier[] Mods { get { return Modifiers.ToArray(); } }
+	public List<TerrainNoiseModifier> ProcMods = new List<TerrainNoiseModifier>();
+	public TerrainNoiseModifier[] Mods { 
+		get {List<TerrainNoiseModifier> temp = new List<TerrainNoiseModifier>(ProcMods.Count + Modifiers.Count);
+			temp.AddRange(ProcMods);
+			temp.AddRange(Modifiers);
+			return temp.ToArray();
+			} 
+		}
 
 	[Space]
 	[Header("Decor Settings")]
@@ -137,10 +144,10 @@ public class WorldGen : MonoBehaviour {
     {
         ClearWorldData();
 
-        WorldGenStart.Invoke();
-
         Init_Seeds();
+		WorldGenPreInit.Invoke(Seed);
 
+        WorldGenStart.Invoke();
         //Build the Tile Grid
         Init_Tiles();
     }
@@ -351,13 +358,9 @@ public class WorldGen : MonoBehaviour {
 			BuildDecor(Tx, Ty, HoldsM);
 		}
 		TilesBuilding.RemoveAt(0);
-		if (TilesBuilding.Count > 0)
+		if (!(TilesBuilding.Count > 0))
 		{
-			Debug.Log(TilesBuilding.Count);
-		} else {
 			WorldGenFinish.Invoke();
-			Debug.Log(TilesBuilding.Count);
-
 		}
 
 	}
@@ -518,7 +521,7 @@ public class WorldGen : MonoBehaviour {
 				Vector3 poiPos = tMod.GetPosition();
 				GameObject obj = null;
 				if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
-					obj = tMod.BuildGameObject();
+					obj = tMod.GetGameObject();
 				if (obj != null)
 					poi_OnTile.Add(obj);
 			
