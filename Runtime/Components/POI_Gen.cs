@@ -10,6 +10,8 @@ public class POI_Gen : MonoBehaviour
     public uint cityCount = 5;
     
     [SerializeField]
+    TerrainNoiseModifier modifier_template;
+    [SerializeField]
     WorldGen generator;
     
     // Start is called before the first frame update
@@ -26,8 +28,9 @@ public class POI_Gen : MonoBehaviour
         
     }
 
-    public void Gen_POIs(int seed)
+    public void Gen_POIs()
     {
+        int seed = generator.Seed;
         List<TerrainNoiseModifier> NewMods = new List<TerrainNoiseModifier>();
         TerrainNoiseModifier mod = null;
         System.Random rand = new System.Random(seed);
@@ -39,7 +42,12 @@ public class POI_Gen : MonoBehaviour
             x = (float)rand.NextDouble() * 2 * worldResolution;
             y = (float)rand.NextDouble() * 2 * worldResolution;
             mod.Position = new Vector3(x,generator.GetHeight(x,y),y);
-            mod.innerRadius = 5;
+            Debug.Log(mod.Position);
+            mod.innerRadius = 50;
+            if (modifier_template != null)
+            {
+                mod.Prefab = modifier_template.Prefab;
+            }
             NewMods.Add(mod);
         }
         generator.ProcMods.AddRange(NewMods);

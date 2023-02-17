@@ -132,6 +132,7 @@ GameObject:
   m_Component:
   - component: {fileID: 275703564}
   - component: {fileID: 275703563}
+  - component: {fileID: 275703565}
   m_Layer: 0
   m_Name: WorldGen
   m_TagString: Untagged
@@ -153,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxLOD: 0
   UseSeed: 0
-  Seed: -1976946103
+  Seed: -1274532133
   BuildOnStart: 1
   Player: {fileID: 0}
   OctaveCount: 4
@@ -197,9 +198,13 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  WorldGenPreInit:
+    m_PersistentCalls:
+      m_Calls: []
   SpawnPOIs: 1
   Modifiers:
   - {fileID: 11400000, guid: 5be6e31558a9fc449850d2d51e96ea55, type: 2}
+  ProcMods: []
   buildDecor: 0
   DecorChunkSize: 150
   DecorDensity: 0.953
@@ -227,6 +232,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &275703565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 275703562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0d82b9cfd6bfc84b90d4461ca856d13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldRadius: 5000000
+  worldResolution: 100
+  cityCount: 5
+  generator: {fileID: 0}
 --- !u!114 &820522074
 MonoBehaviour:
   m_ObjectHideFlags: 0

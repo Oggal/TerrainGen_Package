@@ -49,7 +49,7 @@ public class WorldGen : MonoBehaviour {
 	public UnityEvent WorldGenFinish;
 
 	[Tooltip("Called before World Generation starts")]
-	public UnityEvent<int> WorldGenPreInit;
+	public UnityEvent WorldGenPreInit;
 
 	[Header("World Contents")]
 	[Tooltip("Should the generator check for POI Objects")]
@@ -145,7 +145,7 @@ public class WorldGen : MonoBehaviour {
         ClearWorldData();
 
         Init_Seeds();
-		WorldGenPreInit.Invoke(Seed);
+		WorldGenPreInit.Invoke();
 
         WorldGenStart.Invoke();
         //Build the Tile Grid
