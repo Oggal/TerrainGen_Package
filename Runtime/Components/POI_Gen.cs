@@ -39,11 +39,11 @@ public class POI_Gen : MonoBehaviour
             Debug.Log("QUICK BATMAN! Make a place!");
             mod  = ScriptableObject.CreateInstance<TerrainNoiseModifier>();
             float x,y;
-            x = (float)rand.NextDouble() * 2 * worldResolution;
-            y = (float)rand.NextDouble() * 2 * worldResolution;
+            x = ((float)rand.NextDouble() * 2 * worldResolution) - worldResolution;
+            y = ((float)rand.NextDouble() * 2 * worldResolution) - worldResolution;
             mod.Position = new Vector3(x,generator.GetHeight(x,y),y);
-            Debug.Log(mod.Position);
-            mod.innerRadius = 50;
+            mod.innerRadius = 50f;
+            mod.outerRadius = 25f;
             if (modifier_template != null)
             {
                 mod.Prefab = modifier_template.Prefab;

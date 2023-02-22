@@ -218,7 +218,7 @@ public class WorldGen : MonoBehaviour {
 		if (SpawnPOIs)
 		{
 			float ratio = 0;
-			foreach(TerrainNoiseModifier TNM in Modifiers)
+			foreach(TerrainNoiseModifier TNM in Mods)
 			{
 				if(ratio <TNM.GetRatio(pX, pY))
 				{
@@ -237,7 +237,7 @@ public class WorldGen : MonoBehaviour {
 		if (SpawnPOIs)
 		{
 			float ratio = 0;
-			foreach (TerrainNoiseModifier TNM in Modifiers)
+			foreach (TerrainNoiseModifier TNM in Mods)
 			{
 				if (ratio < TNM.GetRatio(pX, pY))
 				{
@@ -467,7 +467,7 @@ public class WorldGen : MonoBehaviour {
 
 		//This really only needs done if we're close enought to something that modifies terrain.
 		//We could store a list of modifiers and adjust from there.
-        if (Modifiers.Count!=0 && ratio !=0)
+        if (Mods.Length!=0 && ratio !=0)
         {
 			getRatio(px, py, out float height);
 

@@ -245,8 +245,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldRadius: 5000000
-  worldResolution: 100
+  worldResolution: 600
   cityCount: 5
+  modifier_template: {fileID: 11400000, guid: 49cc851559002bf4bb40b22ad8f094c6, type: 2}
   generator: {fileID: 0}
 --- !u!114 &820522074
 MonoBehaviour:
