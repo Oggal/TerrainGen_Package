@@ -15,12 +15,12 @@ public class WolrdGenInspector : Editor
     {
         WorldGen gen = (WorldGen)target;
 		
-		// if(GUILayout.Button("Screen Cap"))
-		// {
-		// 	ScreenCapture.CaptureScreenshot(Application.dataPath + 
-		// 		"/Oggal/ScreenShots/" + ((System.DateTime.Today.ToShortDateString()).Replace("/","-"))
-		// 		+"_"+((System.DateTime.Now.ToShortTimeString()).Replace(" ", "").Replace(":",""))+".png", 1);
-		// }
+		if(GUILayout.Button("Screen Cap"))
+		{
+			ScreenCapture.CaptureScreenshot(Application.dataPath + 
+				"/Oggal/ScreenShots/" + ((System.DateTime.Today.ToShortDateString()).Replace("/","-"))
+				+"_"+((System.DateTime.Now.ToShortTimeString()).Replace(" ", "").Replace(":",""))+".png", 1);
+		}
 
 		showDefault = EditorGUILayout.Foldout(showDefault, "Show Default Inspector");
 		if(showDefault)
