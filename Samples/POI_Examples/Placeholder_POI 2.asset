@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Placeholder_POI 2
   m_EditorClassIdentifier: 
   Position: {x: 0, y: 0, z: 0}
-  Prefab: {fileID: 8759102681163810373, guid: 41b14526daeac46408b200b749b4234d, type: 3}
+  Prefab: {fileID: 8759102681163810373, guid: bdb2ac5a17a6f0849a5dc1d22a12be05, type: 3}
   innerRadius: 0
   outerRadius: 0
   OnSpawned:

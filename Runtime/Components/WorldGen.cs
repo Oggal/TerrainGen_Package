@@ -54,16 +54,6 @@ public class WorldGen : MonoBehaviour {
 	[Header("World Contents")]
 	[Tooltip("Should the generator check for POI Objects")]
 	public bool SpawnPOIs= false;
-	[SerializeField]
-	List<TerrainNoiseModifier> Modifiers;
-	public List<TerrainNoiseModifier> ProcMods = new List<TerrainNoiseModifier>();
-	public TerrainNoiseModifier[] Mods { 
-		get {List<TerrainNoiseModifier> temp = new List<TerrainNoiseModifier>(ProcMods.Count + Modifiers.Count);
-			temp.AddRange(ProcMods);
-			temp.AddRange(Modifiers);
-			return temp.ToArray();
-			} 
-		}
 
 	[Space]
 	[Header("Decor Settings")]
@@ -215,8 +205,9 @@ public class WorldGen : MonoBehaviour {
     private float getRatio(float pX, float pY, out float height)
     {
 		height = 0;
-		if (SpawnPOIs)
+		if (SpawnPOIs && GetComponent<POI_Gen>() != null)
 		{
+			TerrainNoiseModifier[] Mods =GetComponent<POI_Gen>()?.Mods;
 			float ratio = 0;
 			foreach(TerrainNoiseModifier TNM in Mods)
 			{
@@ -234,8 +225,9 @@ public class WorldGen : MonoBehaviour {
 	private float getRatio(float pX, float pY)
 	{
 		
-		if (SpawnPOIs)
+		if (SpawnPOIs && GetComponent<POI_Gen>() != null)
 		{
+			TerrainNoiseModifier[] Mods =GetComponent<POI_Gen>()?.Mods;
 			float ratio = 0;
 			foreach (TerrainNoiseModifier TNM in Mods)
 			{
@@ -467,7 +459,7 @@ public class WorldGen : MonoBehaviour {
 
 		//This really only needs done if we're close enought to something that modifies terrain.
 		//We could store a list of modifiers and adjust from there.
-        if (Mods.Length!=0 && ratio !=0)
+        if (GetComponent<POI_Gen>() != null && ratio !=0)
         {
 			getRatio(px, py, out float height);
 
@@ -502,8 +494,8 @@ public class WorldGen : MonoBehaviour {
 		List<GameObject> Decor = new List<GameObject>();
 		if (buildDecor)
 			Decor.AddRange(GetDecorinRect(TileArea));
-		if (SpawnPOIs)
-			Decor.AddRange(GetPOIinRect(TileArea));
+		if (GetComponent<POI_Gen>())
+			Decor.AddRange(GetComponent<POI_Gen>().GetPOIinRect(TileArea));
 		
 	
 			foreach (GameObject deco in Decor)
@@ -511,25 +503,6 @@ public class WorldGen : MonoBehaviour {
 				deco.transform.SetParent(tile.transform, true);
 			}
 		
-	}
-
-	private GameObject[] GetPOIinRect(Rect area)
-    {
-		List<GameObject> poi_OnTile = new List<GameObject>();
-		foreach (TerrainNoiseModifier tMod in Mods)
-		{
-				Vector3 poiPos = tMod.GetPosition();
-				GameObject obj = null;
-				if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
-					obj = tMod.GetGameObject();
-				if (obj != null)
-					poi_OnTile.Add(obj);
-			
-				tMod.OnSpawned?.Invoke();
-
-		}
-
-		return poi_OnTile.ToArray();
 	}
 
 

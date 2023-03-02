@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxLOD: 0
   UseSeed: 0
-  Seed: -1274532133
+  Seed: 1442240958
   BuildOnStart: 1
   Player: {fileID: 0}
   OctaveCount: 4
@@ -241,14 +241,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 275703562}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0d82b9cfd6bfc84b90d4461ca856d13, type: 3}
+  m_Script: {fileID: 11500000, guid: ac9f50a623def2046afdfe76a7334a9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   worldRadius: 5000000
   worldResolution: 600
-  cityCount: 5
-  modifier_template: {fileID: 11400000, guid: 49cc851559002bf4bb40b22ad8f094c6, type: 2}
-  generator: {fileID: 0}
+  cityCounts: 010000000300000001000000
+  modifier_templates:
+  - {fileID: 11400000, guid: 49cc851559002bf4bb40b22ad8f094c6, type: 2}
+  - {fileID: 11400000, guid: 88a9c00e4808a7b4291dea1e459fe4c3, type: 2}
+  - {fileID: 11400000, guid: 19c9ee6aa25747b4ab2ba0e56255603c, type: 2}
+  generator: {fileID: 275703563}
+  StaticModifiers: []
 --- !u!114 &820522074
 MonoBehaviour:
   m_ObjectHideFlags: 0
