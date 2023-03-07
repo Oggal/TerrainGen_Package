@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+[SelectionBase]
 public class WorldGen : MonoBehaviour {
 	public int MaxLOD = 0;
 
