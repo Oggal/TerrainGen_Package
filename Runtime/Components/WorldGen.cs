@@ -19,8 +19,7 @@ public class WorldGen : MonoBehaviour {
     public int OctaveCount = 4;			// Levels for Max Detail World
 	public int PhysOctaveCount = 4;		// DEV Var to test Generating a collison mesh with less layers.(UN-USED)
 
-	[SerializeField, Tooltip("Noise Object to use if none specified")]
-	private TerrainNoiseObject FallbackNoiseObject;
+	private TerrainNoiseObject FallbackNoiseObject{ get { return ScriptableObject.CreateInstance<ConstantNoiseObject>(); }  }
 
     public Material[] mats;
 	public bool UseManyMats = false;
