@@ -39,6 +39,14 @@ public class POI_Gen : MonoBehaviour
         generator.WorldGenPreInit.AddListener(this.Gen_POIs);
     }
 
+    [ContextMenu("Clear")]
+    public void Clear()
+    {
+        ProcMods.Clear();
+        if(generator)
+            generator.WorldGenPreInit.RemoveListener(this.Gen_POIs);
+    }
+
     void OnValidate()
     {
         if(cityCounts.Length < modifier_templates.Length){
