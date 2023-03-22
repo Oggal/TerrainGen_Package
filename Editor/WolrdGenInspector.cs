@@ -76,6 +76,12 @@ public class WolrdGenInspector : Editor
 		 if(GUILayout.Button("Build World",GUILayout.MaxWidth(100))){
 			Gen.BuildWorld();
 		 }
+		 if(GUILayout.Button("Timed Build World",GUILayout.MaxWidth(100))){
+			float start_time = Time.realtimeSinceStartup;
+			Gen.BuildWorld();
+			Debug.Log("World Built in " + (Time.realtimeSinceStartup - start_time).ToString("f6") + " seconds");
+		 }
+		 
 		 Handles.EndGUI();
 	}
 
@@ -88,10 +94,11 @@ public class WolrdGenInspector : Editor
 		Gizmos.DrawWireCube(obj.position,new Vector3((0.5f+target.Radius)*target.TileSize,2,(0.5f+target.Radius)*target.TileSize)*2);
 		Gizmos.color = Color.green;
 		Gizmos.DrawWireCube(obj.position,new Vector3(target.TileSize * target.Radius,100,target.TileSize * target.Radius));
-		foreach( MeshCollider mCol in target.GetComponentsInChildren<MeshCollider>()){
-			Gizmos.color = Color.cyan;
-			Gizmos.DrawMesh(mCol.sharedMesh,mCol.transform.position);
-		}
+		
+		// foreach( MeshCollider mCol in target.GetComponentsInChildren<MeshCollider>()){
+		// 	Gizmos.color = Color.cyan;
+		// 	Gizmos.DrawMesh(mCol.sharedMesh,mCol.transform.position);
+		// }
 	}
 
 }

@@ -340,7 +340,7 @@ public class WorldGen : MonoBehaviour {
 		m.uv = uv;
 		m.triangles = tri;
 		// yield return null;
-		//m.RecalculateNormals();
+		m.RecalculateNormals();
 		m.RecalculateBounds();
 
 		if (!RunInstant)
