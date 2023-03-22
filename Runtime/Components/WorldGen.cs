@@ -262,6 +262,7 @@ public class WorldGen : MonoBehaviour {
         }
         int TSize = V_VertexCount + 1;
         Vector3[] verts = new Vector3[TSize * TSize];
+		Vector3[] normals = new Vector3[TSize * TSize];
         Vector2[] uv = new Vector2[TSize * TSize];
         int[] tri = new int[6 * ((TSize - 1) * (TSize - 1))];
 		float VertDis = ((float)TileSize) / V_VertexCount;
@@ -283,6 +284,7 @@ public class WorldGen : MonoBehaviour {
                     Yi);
 #region UV map
                 uv[id] = gridUV(x,y);
+				normals[id] = GetNormal(Xi+lx, Yi+ly);
 #endregion
 				// Build Triangles
 				AddTriangle(x,y,id,TSize,tri);
@@ -295,8 +297,9 @@ public class WorldGen : MonoBehaviour {
 		m.vertices = verts;
         m.uv = uv;
         m.triangles = tri;
+		m.normals = normals;
        // yield return null;
-        m.RecalculateNormals();
+        //m.RecalculateNormals();
         m.RecalculateBounds();
         
         HoldsM.GetComponent<MeshFilter>().mesh = m;
@@ -337,7 +340,7 @@ public class WorldGen : MonoBehaviour {
 		m.uv = uv;
 		m.triangles = tri;
 		// yield return null;
-		m.RecalculateNormals();
+		//m.RecalculateNormals();
 		m.RecalculateBounds();
 
 		if (!RunInstant)
@@ -355,6 +358,19 @@ public class WorldGen : MonoBehaviour {
 			WorldGenFinish.Invoke();
 		}
 
+	}
+
+	Vector3 GetNormal(float x, float z)
+	{
+		float delta = 5f;
+		Vector3 A = new Vector3(x - delta, GetHeight(x - delta, z - delta), z - delta);
+		Vector3 B = new Vector3(x + delta, GetHeight(x + delta, z + delta), z + delta);
+		Vector3 C = new Vector3(x - delta, GetHeight(x - delta, z + delta), z + delta);
+		Vector3 D = new Vector3(x + delta, GetHeight(x + delta, z - delta), z - delta);
+
+		Vector3 normal = Vector3.Cross(D - C, A - B);
+		//Debug.Log(normal);
+		return normal.normalized;	
 	}
 
 	private GameObject BuildTile(int Tx, int Ty)
