@@ -284,7 +284,7 @@ public class WorldGen : MonoBehaviour {
                     Yi);
 #region UV map
                 uv[id] = gridUV(x,y);
-				normals[id] = GetNormal(Xi+lx, Yi+ly);
+				normals[id] = GetNormal(Xi + lx, Yi + ly);
 #endregion
 				// Build Triangles
 				AddTriangle(x,y,id,TSize,tri);
