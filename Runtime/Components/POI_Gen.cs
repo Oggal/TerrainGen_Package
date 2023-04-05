@@ -84,9 +84,9 @@ public class POI_Gen : MonoBehaviour
 
     public GameObject[] GetPOIinRect(Rect area)
     {
-		List<GameObject> poi_OnTile = new List<GameObject>();
-		foreach (TerrainNoiseModifier tMod in Mods)
-		{
+        List<GameObject> poi_OnTile = new List<GameObject>();
+        foreach (TerrainNoiseModifier tMod in Mods)
+        {
             Vector3 poiPos = tMod.GetPosition();
             GameObject obj = null;
             if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
@@ -95,10 +95,8 @@ public class POI_Gen : MonoBehaviour
                 poi_OnTile.Add(obj);
         
             tMod.OnSpawned?.Invoke();
-
 		}
-
-		return poi_OnTile.ToArray();
+        return poi_OnTile.ToArray();
 	}
 
 }
