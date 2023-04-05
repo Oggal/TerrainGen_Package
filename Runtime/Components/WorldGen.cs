@@ -96,8 +96,6 @@ public class WorldGen : MonoBehaviour {
 	}
     
 
-
-
     public void ClearChildren(GameObject g)
     {
         while (g.transform.childCount > 0)
@@ -512,12 +510,11 @@ public class WorldGen : MonoBehaviour {
 			Decor.AddRange(GetDecorinRect(TileArea));
 		if (GetComponent<POI_Gen>())
 			Decor.AddRange(GetComponent<POI_Gen>().GetPOIinRect(TileArea));
-		
-	
-			foreach (GameObject deco in Decor)
-			{
-				deco.transform.SetParent(tile.transform, true);
-			}
+			
+		foreach (GameObject deco in Decor) 
+		{
+			deco.transform.SetParent(tile.transform, true); 
+		}
 		
 	}
 
@@ -539,8 +536,8 @@ public class WorldGen : MonoBehaviour {
 			for(int _X = xMinIndex; _X <= xMaxIndex; _X++)
 			{
 				Vector2Int chunkIndex = new Vector2Int(_X,_Z);
-					DecorChunk dChunk;
-					DecorChunks.TryGetValue(chunkIndex, out dChunk);
+				DecorChunk dChunk;
+				DecorChunks.TryGetValue(chunkIndex, out dChunk);
 					
 				if (dChunk == null){
 					dChunk = new DecorChunk(chunkIndex,
@@ -572,42 +569,33 @@ public class WorldGen : MonoBehaviour {
 		{
 			if (Player.transform.position.x / (TileSize * transform.localScale.x) > localX + ((float)Radius / 2))
 			{
-				Debug.Log("Player is East!");
-
 				MoveX(true);
 			}
 			if (Player.transform.position.x / (TileSize * transform.localScale.x) < localX - ((float)Radius / 2))
 			{
-				Debug.Log("Player is West!");
-
 				MoveX(false);
 			}
 			if (Player.transform.position.z / (TileSize * transform.localScale.z) > localZ + ((float)Radius / 2))
 			{
-				Debug.Log("Player is North!");
-
 				MoveY(true);
 			}
 			if (Player.transform.position.z / (TileSize * transform.localScale.z) < localZ - ((float)Radius / 2))
 			{
-				Debug.Log("Player is South!");
-
 				MoveY(false);
 			}
 		}
 	}
+
+
 	public void MoveX(bool t)
     {
         if (t)
         {
-			
-			//Old Move East Code
             localX++;
             //East
             for (int i = 0; i < TRadius; i++)
             {
                 int id = i * TRadius;
-               // GameObject ti = Tiles[id];
                 Vector3 p = new Vector3((localX + Radius) * TileSize, 0, (localZ + (Radius - i)) * TileSize);
                 UpdateMesh(localX + Radius, localZ + (Radius -i), Tiles[id]);
                 Tiles[id].transform.position = p;
@@ -631,14 +619,10 @@ public class WorldGen : MonoBehaviour {
             for (int i = 0; i < TRadius; i++)
             {
                 int id = ((i + 1) * TRadius) - 1;
-               // GameObject ti = Tiles[id];
-                 Vector3 p = new Vector3((localX - Radius) * TileSize * transform.localScale.x, 0, (localZ + (Radius - i)) * TileSize * transform.localScale.z);
-              
+				Vector3 p = new Vector3((localX - Radius) * TileSize * transform.localScale.x, 0, (localZ + (Radius - i)) * TileSize * transform.localScale.z);              
                 UpdateMesh(localX - Radius, localZ + (Radius - i), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
-
-
 
             for (int y = 0; y < TRadius; y++)
             {
@@ -666,7 +650,6 @@ public class WorldGen : MonoBehaviour {
                 int id = (TRadius * (TRadius - 1)) + i;
                 
                 Vector3 p = new Vector3((localX + (i - Radius)) * TileSize * transform.localScale.x, 0, (localZ + Radius) * TileSize * transform.localScale.z);
-                //  ti.queMove(p);
                 UpdateMesh(localX + (i - Radius), (localZ + Radius), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
@@ -690,8 +673,7 @@ public class WorldGen : MonoBehaviour {
             {
 
                 Vector3 p = new Vector3((localX + (i - Radius)) * TileSize * transform.localScale.x, 0, (localZ - Radius) * TileSize * transform.localScale.z);
-               // ti.queMove(p);
-               UpdateMesh((localX + (i - Radius)),(localZ - Radius),Tiles[i]);
+                UpdateMesh((localX + (i - Radius)),(localZ - Radius),Tiles[i]);
                 Tiles[i].transform.position = p;
 
             }
@@ -710,13 +692,11 @@ public class WorldGen : MonoBehaviour {
     }
 
 #endregion
-
-
-private void PrepareNoise(ref TerrainNoiseObject noise)
-{
-	if (noise == null)
-		noise = Instantiate(FallbackNoiseObject);
-}
+	private void PrepareNoise(ref TerrainNoiseObject noise)
+	{
+		if (noise == null)
+			noise = Instantiate(FallbackNoiseObject);
+	}
 
 }
 

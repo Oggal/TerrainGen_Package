@@ -1,6 +1,6 @@
 {
   "name": "com.quiqi.knightgen",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "displayName": "KNight Terrain Gen",
   "description": "The terrain generation tools for Project KNight",
   "dependencies": {
@@ -15,5 +15,7 @@
     "name": "Oggal",
     "email": "philip.dan.taylor@example.com",
     "url": "https://www.github.com/Oggal"
-  }
+  },
+  "unity": "2019.4",
+  "hideInEditor": false
 }

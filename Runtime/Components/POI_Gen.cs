@@ -87,14 +87,14 @@ public class POI_Gen : MonoBehaviour
 		List<GameObject> poi_OnTile = new List<GameObject>();
 		foreach (TerrainNoiseModifier tMod in Mods)
 		{
-				Vector3 poiPos = tMod.GetPosition();
-				GameObject obj = null;
-				if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
-					obj = tMod.GetGameObject();
-				if (obj != null)
-					poi_OnTile.Add(obj);
-			
-				tMod.OnSpawned?.Invoke();
+            Vector3 poiPos = tMod.GetPosition();
+            GameObject obj = null;
+            if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
+                obj = tMod.GetGameObject();
+            if (obj != null)
+                poi_OnTile.Add(obj);
+        
+            tMod.OnSpawned?.Invoke();
 
 		}
 
