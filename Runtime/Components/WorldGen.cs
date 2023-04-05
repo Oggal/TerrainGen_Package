@@ -205,9 +205,9 @@ public class WorldGen : MonoBehaviour {
 		height = 0;
 		if (SpawnPOIs && GetComponent<POI_Gen>() != null)
 		{
-			TerrainNoiseModifier[] Mods =GetComponent<POI_Gen>()?.Mods;
+			POI_Object[] Mods =GetComponent<POI_Gen>()?.Mods;
 			float ratio = 0;
-			foreach(TerrainNoiseModifier TNM in Mods)
+			foreach(POI_Object TNM in Mods)
 			{
 				if(ratio <TNM.GetRatio(pX, pY))
 				{
@@ -225,9 +225,9 @@ public class WorldGen : MonoBehaviour {
 		
 		if (SpawnPOIs && GetComponent<POI_Gen>() != null)
 		{
-			TerrainNoiseModifier[] Mods =GetComponent<POI_Gen>()?.Mods;
+			POI_Object[] Mods =GetComponent<POI_Gen>()?.Mods;
 			float ratio = 0;
-			foreach (TerrainNoiseModifier TNM in Mods)
+			foreach (POI_Object TNM in Mods)
 			{
 				if (ratio < TNM.GetRatio(pX, pY))
 				{

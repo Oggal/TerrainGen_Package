@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 
 [CreateAssetMenuAttribute(fileName = "New POI", menuName ="Terrain Noise/Modifiers/POI")]
-public class TerrainNoiseModifier : ScriptableObject
+public class POI_Object : ScriptableObject
 {
     public Vector3 Position;
     public GameObject Prefab;
@@ -42,10 +42,4 @@ public class TerrainNoiseModifier : ScriptableObject
     {
         return Position;
     }
-
-    public virtual void Pregeneration() { }
-
-    public UnityEvent OnSpawned;
-    public UnityEvent OnDespawned;
-
 }
