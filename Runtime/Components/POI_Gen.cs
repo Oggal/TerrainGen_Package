@@ -18,12 +18,12 @@ public class POI_Gen : MonoBehaviour
     private TerrainNoiseModifier[] StaticModifiers;
     private List<TerrainNoiseModifier> ProcMods = new List<TerrainNoiseModifier>();
     public TerrainNoiseModifier[] Mods { 
-		get {List<TerrainNoiseModifier> temp = new List<TerrainNoiseModifier>(ProcMods.Count + StaticModifiers.Length);
-			temp.AddRange(ProcMods);
-			temp.AddRange(StaticModifiers);
-			return temp.ToArray();
-			} 
-		}
+        get {List<TerrainNoiseModifier> temp = new List<TerrainNoiseModifier>(ProcMods.Count + StaticModifiers.Length);
+            temp.AddRange(ProcMods);
+            temp.AddRange(StaticModifiers);
+            return temp.ToArray();
+            }
+        }
     // Start is called before the first frame update
     void OnEnable()
     {
@@ -98,7 +98,6 @@ public class POI_Gen : MonoBehaviour
 		}
         return poi_OnTile.ToArray();
 	}
-
 }
 
 
