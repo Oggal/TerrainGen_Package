@@ -34,6 +34,7 @@ public class DecorChunk
                         worldRef));
             }
         }
+
         return decorOnTile.ToArray();
     }
 
@@ -41,12 +42,14 @@ public class DecorChunk
     void Populate(){
         //I would love to assume that the random hasn't been used. but we cant.
         rand = new System.Random(seed);
+        //Fill a square
         for(int i = 0;i<worldRef.DecorAttempts;i++){
-            Vector2 pos = new Vector2((float)rand.NextDouble()-0.5f,(float)rand.NextDouble()-0.5f);
+            Vector2 pos = new Vector2((float)rand.NextDouble(),(float)rand.NextDouble());     //Vector2 ([0,1],[0,1])
             int decorSeed = Mathf.RoundToInt(Mathf.Floor((float)rand.NextDouble() * worldRef.decorObjects.Count));
             if(rand.NextDouble()>worldRef.DecorDensity){
                 decorDict.Add(pos,worldRef.decorObjects[decorSeed]);
             }
         }
     }
+
 }

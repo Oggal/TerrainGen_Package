@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using UnityEngine.Events;
 
+[SelectionBase]
 public class WorldGen : MonoBehaviour {
 	public int MaxLOD = 0;
 
@@ -19,8 +19,7 @@ public class WorldGen : MonoBehaviour {
     public int OctaveCount = 4;			// Levels for Max Detail World
 	public int PhysOctaveCount = 4;		// DEV Var to test Generating a collison mesh with less layers.(UN-USED)
 
-	[SerializeField, Tooltip("Noise Object to use if none specified")]
-	private TerrainNoiseObject FallbackNoiseObject;
+	private TerrainNoiseObject FallbackNoiseObject{ get { return ScriptableObject.CreateInstance<ConstantNoiseObject>(); }  }
 
     public Material[] mats;
 	public bool UseManyMats = false;
@@ -45,13 +44,16 @@ public class WorldGen : MonoBehaviour {
 	[Header("Events")]
 	[Tooltip("Called at Start of Initial World Generation")]
 	public UnityEvent WorldGenStart;
+	
 	[Tooltip("Called When WorldGen Finishes")]
 	public UnityEvent WorldGenFinish;
-	
+
+	[Tooltip("Called before World Generation starts")]
+	public UnityEvent WorldGenPreInit;
 
 	[Header("World Contents")]
-	public bool UseCityGrid = false;
-
+	[Tooltip("Should the generator check for POI Objects")]
+	public bool SpawnPOIs= false;
 
 	[Space]
 	[Header("Decor Settings")]
@@ -67,8 +69,7 @@ public class WorldGen : MonoBehaviour {
 	public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
 	[Space]
 	[Header("Experimental")]
-	[SerializeField]
-	List<TerrainNoiseModifier> Modifiers;
+
 
 
     private int TRadius;
@@ -79,7 +80,7 @@ public class WorldGen : MonoBehaviour {
     [SerializeField]private TerrainNoiseObject[] Octaves;
     [SerializeField]private TerrainNoiseObject ScaleMap;
 
-	private int TilesBuilding = 0;
+	private List<IEnumerator> TilesBuilding = new List<IEnumerator>();
 
     public void Start()
     {
@@ -94,8 +95,6 @@ public class WorldGen : MonoBehaviour {
 
 	}
     
-
-
 
     public void ClearChildren(GameObject g)
     {
@@ -126,65 +125,68 @@ public class WorldGen : MonoBehaviour {
 
 		//Get 'True Raduis' or Diameter
         TRadius = Radius * 2 + 1;
-
 		DecorChanceMap = null;
-
 	}
 
-
-
-	//TODO Document This Function
     public void BuildWorld()
     {
-		ClearWorldData();
-		
+        ClearWorldData();
 
-		WorldGenStart.Invoke();
-			
-		//If we are not using a preset Seed generate a new one
-        if (!UseSeed)
-            Seed = Random.Range(int.MinValue,int.MaxValue);
-		Seeds = new int[OctaveCount + 2];
-		Seeds[0] = Seed;
-			
-		System.Random r = new System.Random(Seed);  //Create the Random object to be used
-		Seeds[OctaveCount + 1] = r.Next();
+        Init_Seeds();
+		WorldGenPreInit.Invoke();
 
-		//Intialize the Octaves
-		if (Octaves == null || Octaves.Length != OctaveCount)
-			Octaves = new TerrainNoiseObject[OctaveCount];
-
-		//Define the ScaleMap
-		PrepareNoise(ref ScaleMap);
-		ScaleMap.Intialize(Seed, 3);
-		//Construct the Octaves
-        for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
-        {
-            Seeds[OctaveIndex+1] = r.Next();//Get the Seed for Each Octave
-			PrepareNoise(ref Octaves[OctaveIndex]);
-            Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
-        }
-		
-		//Build the Tile Grid
-		Tiles = new GameObject[TRadius * TRadius];  //Define The tiles in code
+        WorldGenStart.Invoke();
+        //Build the Tile Grid
+        Init_Tiles();
+    }
 
 
-		//Actually Build the Tiles
-		for (int y = Radius * -1; y <= Radius; y++)
+    private void Init_Tiles()
+    {
+        Tiles = new GameObject[TRadius * TRadius];  //Define The tiles in code
+
+        //Actually Build the Tiles
+        for (int y = Radius * -1; y <= Radius; y++)
         {
             for (int x = Radius * -1; x <= Radius; x++)
             {
-				int id = (Radius - y) * TRadius + (x + Radius);
+                int id = (Radius - y) * TRadius + (x + Radius);
 
-				Tiles[id] = BuildTile(x, y);
-				Tiles[id].name += id;
+                Tiles[id] = BuildTile(x, y);
+                Tiles[id].name += id;
             }
         }
-		//WorldGenFinish.Invoke();
-
     }
 
-	private void BuildMesh(int Tx, int Ty, GameObject HoldsMesh)
+    private void Init_Seeds()
+    {
+        //If we are not using a preset Seed generate a new one
+        if (!UseSeed)
+            Seed = Random.Range(int.MinValue, int.MaxValue);
+        Seeds = new int[OctaveCount + 2];
+        Seeds[0] = Seed;
+		//Create the Random object to be used
+        System.Random r = new System.Random(Seed);
+        Seeds[OctaveCount + 1] = r.Next();
+
+        //Intialize the Octaves
+        if (Octaves == null || Octaves.Length != OctaveCount)
+            Octaves = new TerrainNoiseObject[OctaveCount];
+
+        //Define the ScaleMap
+        PrepareNoise(ref ScaleMap);
+        ScaleMap.Intialize(Seed, 3);
+        //Construct the Octaves
+        for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
+        {	
+			//Get the Seed for Each Octave
+            Seeds[OctaveIndex + 1] = r.Next();
+            PrepareNoise(ref Octaves[OctaveIndex]);
+            Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
+        }
+    }
+
+    private void BuildMesh(int Tx, int Ty, GameObject HoldsMesh)
 	{
 		if (Application.isPlaying)
 		{
@@ -198,14 +200,14 @@ public class WorldGen : MonoBehaviour {
 		}
 	}
 
-
-    private float getRatio(float pX,float pY,out float height)
+    private float getRatio(float pX, float pY, out float height)
     {
 		height = 0;
-		if (UseCityGrid)
+		if (SpawnPOIs && GetComponent<POI_Gen>() != null)
 		{
+			POI_Object[] Mods =GetComponent<POI_Gen>()?.Mods;
 			float ratio = 0;
-			foreach(TerrainNoiseModifier TNM in Modifiers)
+			foreach(POI_Object TNM in Mods)
 			{
 				if(ratio <TNM.GetRatio(pX, pY))
 				{
@@ -221,10 +223,11 @@ public class WorldGen : MonoBehaviour {
 	private float getRatio(float pX, float pY)
 	{
 		
-		if (UseCityGrid)
+		if (SpawnPOIs && GetComponent<POI_Gen>() != null)
 		{
+			POI_Object[] Mods =GetComponent<POI_Gen>()?.Mods;
 			float ratio = 0;
-			foreach (TerrainNoiseModifier TNM in Modifiers)
+			foreach (POI_Object TNM in Mods)
 			{
 				if (ratio < TNM.GetRatio(pX, pY))
 				{
@@ -237,16 +240,16 @@ public class WorldGen : MonoBehaviour {
 		return 0.0f;
 	}
 
-
-	private void UpdateMesh(int Tx, int Ty, GameObject m,bool RunInstant = false)
+	private void UpdateMesh(int Tx, int Ty, GameObject m, bool RunInstant = false)
     {
-		TilesBuilding++;
+		
 		IEnumerator i = BuildMeshSlow(Tx, Ty, m,RunInstant);
-        StartCoroutine(BuildMeshSlow(Tx,Ty,m,RunInstant));
+		TilesBuilding.Add(i);
+		StartCoroutine(i);
 		//Should add the coroutine to a list, when the list is empty call the finished event
     }
 
-    private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM,bool RunInstant = false)
+    private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM, bool RunInstant = false)
     {
 		if(HoldsM){ClearChildren(HoldsM);}
         HoldsM.GetComponent<MeshRenderer>().enabled = false;
@@ -257,6 +260,7 @@ public class WorldGen : MonoBehaviour {
         }
         int TSize = V_VertexCount + 1;
         Vector3[] verts = new Vector3[TSize * TSize];
+		Vector3[] normals = new Vector3[TSize * TSize];
         Vector2[] uv = new Vector2[TSize * TSize];
         int[] tri = new int[6 * ((TSize - 1) * (TSize - 1))];
 		float VertDis = ((float)TileSize) / V_VertexCount;
@@ -270,14 +274,15 @@ public class WorldGen : MonoBehaviour {
             for (int x = 0; x < TSize; x++)
             {
                 int id = y * TSize + x;
-                float Xi = (x*VertDis) - (TileSize / 2);
-                float Yi = (y*VertDis) - (TileSize / 2);
+                float Xi = (x * VertDis) - (TileSize / 2);
+                float Yi = (y * VertDis) - (TileSize / 2);
                 verts[id] = new Vector3(
                     Xi,
                     GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly),MaxLOD),
                     Yi);
 #region UV map
-                uv[id] = CalcUV(x,y);
+                uv[id] = gridUV(x,y);
+				normals[id] = GetNormal(Xi + lx, Yi + ly);
 #endregion
 				// Build Triangles
 				AddTriangle(x,y,id,TSize,tri);
@@ -290,8 +295,9 @@ public class WorldGen : MonoBehaviour {
 		m.vertices = verts;
         m.uv = uv;
         m.triangles = tri;
+		m.normals = normals;
        // yield return null;
-        m.RecalculateNormals();
+        //m.RecalculateNormals();
         m.RecalculateBounds();
         
         HoldsM.GetComponent<MeshFilter>().mesh = m;
@@ -317,7 +323,7 @@ public class WorldGen : MonoBehaviour {
 				float Yi = (y * VertDis) - (TileSize / 2);
 				verts[id] = new Vector3(
 					Xi,
-					GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly),PhysOctaveCount),
+					GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly), PhysOctaveCount),
 					Yi);
 
 				// Build Triangles
@@ -340,16 +346,29 @@ public class WorldGen : MonoBehaviour {
 		(HoldsM.GetComponent<MeshCollider>() == null ? HoldsM.AddComponent<MeshCollider>() : HoldsM.GetComponent<MeshCollider>()).sharedMesh = m;
 
 
-		if (buildDecor)
+		if (buildDecor || SpawnPOIs)
 		{
 			BuildDecor(Tx, Ty, HoldsM);
 		}
-
-		if (--TilesBuilding == 0)
+		TilesBuilding.RemoveAt(0);
+		if (!(TilesBuilding.Count > 0))
 		{
 			WorldGenFinish.Invoke();
 		}
 
+	}
+
+	Vector3 GetNormal(float x, float z)
+	{
+		float delta = 5f;
+		Vector3 A = new Vector3(x - delta, GetHeight(x - delta, z - delta), z - delta);
+		Vector3 B = new Vector3(x + delta, GetHeight(x + delta, z + delta), z + delta);
+		Vector3 C = new Vector3(x - delta, GetHeight(x - delta, z + delta), z + delta);
+		Vector3 D = new Vector3(x + delta, GetHeight(x + delta, z - delta), z - delta);
+
+		Vector3 normal = Vector3.Cross(D - C, A - B);
+		//Debug.Log(normal);
+		return normal.normalized;	
 	}
 
 	private GameObject BuildTile(int Tx, int Ty)
@@ -361,7 +380,7 @@ public class WorldGen : MonoBehaviour {
         return BuildTile(Tx, Ty, tile);
     }
 
-	private Vector2 CalcUV(int x,int y)
+	private Vector2 CalcUV(int x, int y)
 	{
 		int xu = x % 4;
 		int yu = y % 4;
@@ -387,6 +406,11 @@ public class WorldGen : MonoBehaviour {
 		}
 		v = yu / 2.0f;
 		return new Vector2 (Mathf.Abs(u),Mathf.Abs(v));
+	}
+	
+	private Vector2 gridUV(int x, int y)
+	{
+		return new Vector2((float)x / V_VertexCount, (float)y / V_VertexCount);
 	}
 	private void AddTriangle(int x, int y, int id, int TSize, int[] tri){
 			if (y < TSize - 1 && x < TSize - 1)
@@ -422,7 +446,7 @@ public class WorldGen : MonoBehaviour {
 		tile.transform.localScale = Vector3.one;
         tile.transform.position = Vector3.Scale(new Vector3(Tx * TileSize, 0, Ty * TileSize), transform.localScale);
 	
-		if (buildDecor)
+		if (buildDecor || SpawnPOIs)
 		{
 			BuildDecor(Tx,Ty,tile);
 		}
@@ -437,7 +461,7 @@ public class WorldGen : MonoBehaviour {
 	}
 
 
-    private float GetHeight(float px, float py, float ratio = 0.0f,int LOD = 0)
+    private float GetHeight(float px, float py, float ratio = 0.0f, int LOD = 0)
     {
 
         float output = 0;
@@ -449,7 +473,7 @@ public class WorldGen : MonoBehaviour {
 
 		//This really only needs done if we're close enought to something that modifies terrain.
 		//We could store a list of modifiers and adjust from there.
-        if (Modifiers.Count!=0 && ratio !=0)
+        if (GetComponent<POI_Gen>() != null && ratio !=0)
         {
 			getRatio(px, py, out float height);
 
@@ -477,18 +501,21 @@ public class WorldGen : MonoBehaviour {
 		}
 		//Find the bounds of the Tile
 		float minX, minZ;
-		minX = TileSize * -0.5f + (Tx * TileSize);
-		minZ = TileSize * -0.5f + (Ty * TileSize);
+		minX = ((Tx - 0.5f) * TileSize);
+		minZ = ((Ty - 0.5f) * TileSize);
 
 		Rect TileArea =new Rect(minX,minZ,TileSize,TileSize);
-
-		GameObject[] Decor = GetDecorinRect(TileArea);
-
-
-		//Spawn Remaining Decor
-		foreach( GameObject deco in Decor){
-			deco.transform.SetParent(tile.transform,true);
+		List<GameObject> Decor = new List<GameObject>();
+		if (buildDecor)
+			Decor.AddRange(GetDecorinRect(TileArea));
+		if (GetComponent<POI_Gen>())
+			Decor.AddRange(GetComponent<POI_Gen>().GetPOIinRect(TileArea));
+			
+		foreach (GameObject deco in Decor) 
+		{
+			deco.transform.SetParent(tile.transform, true); 
 		}
+		
 	}
 
 
@@ -509,8 +536,8 @@ public class WorldGen : MonoBehaviour {
 			for(int _X = xMinIndex; _X <= xMaxIndex; _X++)
 			{
 				Vector2Int chunkIndex = new Vector2Int(_X,_Z);
-					DecorChunk dChunk;
-					DecorChunks.TryGetValue(chunkIndex, out dChunk);
+				DecorChunk dChunk;
+				DecorChunks.TryGetValue(chunkIndex, out dChunk);
 					
 				if (dChunk == null){
 					dChunk = new DecorChunk(chunkIndex,
@@ -526,10 +553,7 @@ public class WorldGen : MonoBehaviour {
 
 
 		return AllDecore.ToArray();
-
-
 	}
-
 
 
 #endregion
@@ -545,42 +569,33 @@ public class WorldGen : MonoBehaviour {
 		{
 			if (Player.transform.position.x / (TileSize * transform.localScale.x) > localX + ((float)Radius / 2))
 			{
-				Debug.Log("Player is East!");
-
 				MoveX(true);
 			}
 			if (Player.transform.position.x / (TileSize * transform.localScale.x) < localX - ((float)Radius / 2))
 			{
-				Debug.Log("Player is West!");
-
 				MoveX(false);
 			}
 			if (Player.transform.position.z / (TileSize * transform.localScale.z) > localZ + ((float)Radius / 2))
 			{
-				Debug.Log("Player is North!");
-
 				MoveY(true);
 			}
 			if (Player.transform.position.z / (TileSize * transform.localScale.z) < localZ - ((float)Radius / 2))
 			{
-				Debug.Log("Player is South!");
-
 				MoveY(false);
 			}
 		}
 	}
+
+
 	public void MoveX(bool t)
     {
         if (t)
         {
-			
-			//Old Move East Code
             localX++;
             //East
             for (int i = 0; i < TRadius; i++)
             {
                 int id = i * TRadius;
-               // GameObject ti = Tiles[id];
                 Vector3 p = new Vector3((localX + Radius) * TileSize, 0, (localZ + (Radius - i)) * TileSize);
                 UpdateMesh(localX + Radius, localZ + (Radius -i), Tiles[id]);
                 Tiles[id].transform.position = p;
@@ -604,14 +619,10 @@ public class WorldGen : MonoBehaviour {
             for (int i = 0; i < TRadius; i++)
             {
                 int id = ((i + 1) * TRadius) - 1;
-               // GameObject ti = Tiles[id];
-                 Vector3 p = new Vector3((localX - Radius) * TileSize * transform.localScale.x, 0, (localZ + (Radius - i)) * TileSize * transform.localScale.z);
-              
+				Vector3 p = new Vector3((localX - Radius) * TileSize * transform.localScale.x, 0, (localZ + (Radius - i)) * TileSize * transform.localScale.z);              
                 UpdateMesh(localX - Radius, localZ + (Radius - i), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
-
-
 
             for (int y = 0; y < TRadius; y++)
             {
@@ -639,7 +650,6 @@ public class WorldGen : MonoBehaviour {
                 int id = (TRadius * (TRadius - 1)) + i;
                 
                 Vector3 p = new Vector3((localX + (i - Radius)) * TileSize * transform.localScale.x, 0, (localZ + Radius) * TileSize * transform.localScale.z);
-                //  ti.queMove(p);
                 UpdateMesh(localX + (i - Radius), (localZ + Radius), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
@@ -663,8 +673,7 @@ public class WorldGen : MonoBehaviour {
             {
 
                 Vector3 p = new Vector3((localX + (i - Radius)) * TileSize * transform.localScale.x, 0, (localZ - Radius) * TileSize * transform.localScale.z);
-               // ti.queMove(p);
-               UpdateMesh((localX + (i - Radius)),(localZ - Radius),Tiles[i]);
+                UpdateMesh((localX + (i - Radius)),(localZ - Radius),Tiles[i]);
                 Tiles[i].transform.position = p;
 
             }
@@ -683,13 +692,11 @@ public class WorldGen : MonoBehaviour {
     }
 
 #endregion
-
-
-private void PrepareNoise(ref TerrainNoiseObject noise)
-{
-	if (noise == null)
-		noise = Instantiate(FallbackNoiseObject);
-}
+	private void PrepareNoise(ref TerrainNoiseObject noise)
+	{
+		if (noise == null)
+			noise = Instantiate(FallbackNoiseObject);
+	}
 
 }
 
