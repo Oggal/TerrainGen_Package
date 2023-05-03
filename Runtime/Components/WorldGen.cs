@@ -282,7 +282,7 @@ public class WorldGen : MonoBehaviour {
                     Yi);
 #region UV map
                 uv[id] = gridUV(x,y);
-				normals[id] = GetNormal(Xi + lx, Yi + ly);
+				//normals[id] = GetNormal(Xi + lx, Yi + ly);	// Disabled for now, Being reworked in a sperate branch
 #endregion
 				// Build Triangles
 				AddTriangle(x,y,id,TSize,tri);
@@ -297,7 +297,7 @@ public class WorldGen : MonoBehaviour {
         m.triangles = tri;
 		m.normals = normals;
        // yield return null;
-        //m.RecalculateNormals();
+        m.RecalculateNormals();
         m.RecalculateBounds();
         
         HoldsM.GetComponent<MeshFilter>().mesh = m;
