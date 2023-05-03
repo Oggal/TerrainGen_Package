@@ -35,7 +35,7 @@ public class POI_Gen : MonoBehaviour
         if (generator == null)
             generator = GetComponent<WorldGen>();
         else
-            generator.WorldGenPreInit.RemoveListener(this.Gen_POIs);        
+            generator.WorldGenPreInit.RemoveListener(this.Gen_POIs);
         generator.WorldGenPreInit.AddListener(this.Gen_POIs);
     }
 
@@ -57,6 +57,7 @@ public class POI_Gen : MonoBehaviour
 
     public void Gen_POIs()
     {
+        ProcMods.Clear();
         int seed = generator.Seed;
         List<POI_Object> NewMods = new List<POI_Object>();
         POI_Object mod = null;
