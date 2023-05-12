@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: RockEample
   m_EditorClassIdentifier: 
   visual: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  material: {fileID: 2100000, guid: f5aa04ccc0d6ce4449047629dc2031f5, type: 2}
+  material: {fileID: 2100000, guid: 685c98d89fff1a5418f6962a7b46abfe, type: 2}
   collides: 0
