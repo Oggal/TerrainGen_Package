@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-[CreateAssetMenuAttribute(fileName = "New POI", menuName ="Terrain Noise/Modifiers/POI")]
+[CreateAssetMenuAttribute(fileName = "New POI", menuName = "Terrain Noise/Modifiers/POI")]
 public class POI_Object : ScriptableObject
 {
     public Vector3 Position;
@@ -19,7 +19,7 @@ public class POI_Object : ScriptableObject
         {
             return 0;
         }
-        else if(distance < innerRadius)
+        else if (distance < innerRadius)
         {
             return 1;
         }
@@ -31,7 +31,7 @@ public class POI_Object : ScriptableObject
     }
     public virtual GameObject GetGameObject()
     {
-        if(Prefab == null)
+        if (Prefab == null)
             return null;
         GameObject GO = Instantiate(Prefab);
         GO.transform.position = Position;
