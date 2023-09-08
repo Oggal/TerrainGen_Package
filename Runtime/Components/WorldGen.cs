@@ -697,13 +697,6 @@ public class WorldGen : MonoBehaviour {
 		if (noise == null)
 			noise = Instantiate(FallbackNoiseObject);
 	}
-
-private void PrepareNoise(ref TerrainNoiseObject noise)
-{
-	if (noise == null)
-		noise = Instantiate(FallbackNoiseObject);
-}
-
 }
 
 
