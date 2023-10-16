@@ -125,7 +125,7 @@ public class WorldGen : MonoBehaviour
         localX = 0;
         localZ = 0;
 
-        //Get 'True Raduis' or Diameter
+        
         TRadius = Radius * 2 + 1;
         DecorChanceMap = null;
     }
@@ -133,8 +133,9 @@ public class WorldGen : MonoBehaviour
     public void BuildWorld()
     {
         ClearWorldData();
-
-        Init_Seeds();
+        System.Random r = new System.Random();
+        InitSeeds(ref r);
+        InitNoise(ref r);
         WorldGenPreInit.Invoke();
 
         WorldGenStart.Invoke();
@@ -160,17 +161,8 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private void Init_Seeds()
+    private void InitNoise(ref System.Random r)
     {
-        //If we are not using a preset Seed generate a new one
-        if (!UseSeed)
-            Seed = Random.Range(int.MinValue, int.MaxValue);
-        Seeds = new int[OctaveCount + 2];
-        Seeds[0] = Seed;
-        //Create the Random object to be used
-        System.Random r = new System.Random(Seed);
-        Seeds[OctaveCount + 1] = r.Next();
-
         //Intialize the Octaves
         if (Octaves == null || Octaves.Length != OctaveCount)
             Octaves = new TerrainNoiseObject[OctaveCount];
@@ -181,11 +173,33 @@ public class WorldGen : MonoBehaviour
         //Construct the Octaves
         for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
         {
-            //Get the Seed for Each Octave
-            Seeds[OctaveIndex + 1] = r.Next();
             PrepareNoise(ref Octaves[OctaveIndex]);
             Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
         }
+    }
+
+
+    /// <summary>
+    /// Generates Array of Seeds for Terrain Octaves
+    /// </summary>
+    private void InitSeeds(ref System.Random r)
+    {
+        //If we are not using a preset Seed generate a new one
+        if (!UseSeed)
+            Seed = Random.Range(int.MinValue, int.MaxValue);
+        //Create the array of seeds
+        Seeds = new int[OctaveCount + 2];
+        //Set the first seed to the overall world seed
+        Seeds[0] = Seed;
+        //Create the Seeds to be used
+        r = new System.Random(Seed);
+        Seeds[OctaveCount + 1] = r.Next();
+        for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
+        {
+            //Get the Seed for Each Octave
+            Seeds[OctaveIndex + 1] = r.Next();
+        }
+    
     }
 
     private void BuildMesh(int Tx, int Ty, GameObject HoldsMesh)
@@ -197,7 +211,6 @@ public class WorldGen : MonoBehaviour
         else
         {
             UpdateMesh(Tx, Ty, HoldsMesh, true);
-
             //BuildMeshSingle(Tx, Ty,HoldsMesh);
         }
     }
@@ -271,21 +284,22 @@ public class WorldGen : MonoBehaviour
         float ly = Ty * TileSize;
         if (!RunInstant)
             yield return null;
+        int halfTile = TileSize / 2;
         for (int y = 0; y < TSize; y++)
         {
+            float Yi = (y * VertDis) - halfTile;
             for (int x = 0; x < TSize; x++)
             {
                 int id = y * TSize + x;
-                float Xi = (x * VertDis) - (TileSize / 2);
-                float Yi = (y * VertDis) - (TileSize / 2);
+                float Xi = (x * VertDis) - halfTile;
                 verts[id] = new Vector3(
                     Xi,
                     GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly), MaxLOD),
                     Yi);
-                #region UV map
+
                 uv[id] = gridUV(x, y);
                 //normals[id] = GetNormal(Xi + lx, Yi + ly);	// Disabled for now, Being reworked in a sperate branch
-                #endregion
+
                 // Build Triangles
                 AddTriangle(x, y, id, TSize, tri);
                 //yield return null;
