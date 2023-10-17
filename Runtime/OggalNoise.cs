@@ -15,11 +15,12 @@ public class OggalNoise : TerrainNoiseObject
         return myNoise.getHeight(pos.x, pos.y);
     }
 
-    public override void Intialize(int Seed, float Scale)
+    public override ITerrainNoise Intialize(int Seed, float Scale)
     {
         if (setScale != 0)
             Scale = setScale;
         myNoise = new TerrainNoise(Seed, Mathf.RoundToInt(Scale));
+        return myNoise;
     }
 
 

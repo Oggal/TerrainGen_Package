@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,9 +22,9 @@ public class DistanceCurveNoiseObject : TerrainNoiseObject
 
     }
 
-    public override void Intialize(int Seed, float Scale)
+    public override ITerrainNoise Intialize(int Seed, float Scale)
     {
-
+        throw new NotImplementedException();
     }
 
 

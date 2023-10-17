@@ -3,8 +3,25 @@ using System.Collections.Generic;
 using System;
 
 
+public interface ITerrainNoise
+{
+    float getHeight(float x, float y);
+}
 
-public class TerrainNoise
+public class ConstantNoise : ITerrainNoise
+{
+    float height;
+    public ConstantNoise(float Height)
+    {
+        height = Height;
+    }
+    public float getHeight(float x, float y)
+    {
+        return height;
+    }
+}
+
+public class TerrainNoise : ITerrainNoise
 {
     int Seed;
     public int SideSize = 5;
@@ -37,7 +54,7 @@ public class TerrainNoise
         }
     }
 
-    public float getHeight(float x, float y, float o = 1)
+    public float getHeight(float x, float y)
     {
         return getBaseHeight(x, y);
     }

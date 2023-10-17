@@ -17,9 +17,9 @@ public class ConstantNoiseObject : TerrainNoiseObject
         return height;
     }
 
-    public override void Intialize(int Seed, float Scale)
+    public override ITerrainNoise Intialize(int Seed, float Scale)
     {
-        ;
+        return new ConstantNoise(height);
     }
 
 

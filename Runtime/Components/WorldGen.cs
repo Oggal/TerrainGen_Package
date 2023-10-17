@@ -62,6 +62,9 @@ public class WorldGen : MonoBehaviour
     [Space]
     [SerializeField] private TerrainNoiseObject[] Octaves;
     [SerializeField] private TerrainNoiseObject ScaleMap;
+    private ITerrainNoise[] TerrainData;
+    private ITerrainNoise TerrainScale;
+
     [Space]
 
     [Header("Events")]
@@ -135,7 +138,7 @@ public class WorldGen : MonoBehaviour
         ClearWorldData();
         System.Random r = new System.Random();
         InitSeeds(ref r);
-        InitNoise(ref r);
+        InitOctaves(ref r);
         WorldGenPreInit.Invoke();
 
         WorldGenStart.Invoke();
@@ -161,11 +164,28 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private void InitNoise(ref System.Random r)
+    private void InitOctaves(ref System.Random r)
     {
         //Intialize the Octaves
-        if (Octaves == null || Octaves.Length != OctaveCount)
+        if (TerrainData == null || TerrainData.Length != OctaveCount +1)
+        {
+            ITerrainNoise[] temp = new ITerrainNoise[OctaveCount+1];
             Octaves = new TerrainNoiseObject[OctaveCount];
+            for (int i = 1; i <= OctaveCount; i++)
+            {
+                //see if we can reuse the old noise objects
+                if (TerrainData != null && i < TerrainData.Length)
+                {
+                    temp[i] = TerrainData[i];
+                }
+                else
+                {
+                    //Get FallBack Noise
+                    // temp[i] = FallbackNoiseObject.Intialize(Seeds[i + 1], Mathf.RoundToInt(Mathf.Pow(5, i)));
+                }
+            }
+
+        }
 
         //Define the ScaleMap
         PrepareNoise(ref ScaleMap);
@@ -605,7 +625,7 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    public void MoveX(bool t)
+    private void MoveX(bool t)
     {
         if (t)
         {
