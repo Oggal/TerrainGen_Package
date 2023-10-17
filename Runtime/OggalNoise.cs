@@ -9,12 +9,6 @@ public class OggalNoise : TerrainNoiseObject
     public TerrainNoise myNoise;
     public override bool isValid { get => (myNoise != null); }
 
-    public override float getHeight(Vector2 pos)
-    {
-
-        return myNoise.getHeight(pos.x, pos.y);
-    }
-
     public override ITerrainNoise Intialize(int Seed, float Scale)
     {
         if (setScale != 0)

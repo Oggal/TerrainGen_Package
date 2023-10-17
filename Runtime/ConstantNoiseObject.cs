@@ -11,11 +11,6 @@ public class ConstantNoiseObject : TerrainNoiseObject
 
     public override bool isValid { get => true; }
 
-    public override float getHeight(Vector2 pos)
-    {
-
-        return height;
-    }
 
     public override ITerrainNoise Intialize(int Seed, float Scale)
     {
