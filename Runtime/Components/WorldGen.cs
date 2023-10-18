@@ -25,11 +25,9 @@ public class WorldGen : MonoBehaviour
     private ITerrainNoise FallbackNoiseData { get { return new ConstantNoise(1);}}
 
     public Material[] mats;
-    public bool UseManyMats = false;
+    public bool UseManyMats {get{return mats.Length > 1;}}
     [Space]
-    public float SmoothingX = 100;
-    public float SmoothingZ = 100;
-
+    public float smoothing = 100;
 
     private int localX = 0;
     private int localZ = 0;
@@ -535,7 +533,7 @@ public class WorldGen : MonoBehaviour
         {
             output += TerrainData[i].getHeight(px, py);
         }
-        output *= Mathf.Abs(TerrainScale.getHeight(px / SmoothingX, py / SmoothingZ));
+        output *= Mathf.Abs(TerrainScale.getHeight(px / smoothing, py / smoothing));
 
         //This really only needs done if we're close enought to something that modifies terrain.
         //We could store a list of modifiers and adjust from there.
