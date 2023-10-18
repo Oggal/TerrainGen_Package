@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,18 +14,27 @@ public class DistanceCurveNoiseObject : TerrainNoiseObject
     private AnimationCurve curve;
     public override bool isValid { get => true; }
 
-    public override float getHeight(Vector2 pos)
+    public override ITerrainNoise Intialize(int Seed, float Scale)
     {
-        float dis = Vector2.Distance(pos, Vector2.zero);
+        return new DistanceCurveNoise(scale, curve);
+    }
+
+
+}
+
+public class DistanceCurveNoise : ITerrainNoise
+{
+    float scale;
+    AnimationCurve curve;
+    public DistanceCurveNoise(float Scale, AnimationCurve Curve)
+    {
+        scale = Scale;
+        curve = Curve;
+    }
+    public float getHeight(float x, float y)
+    {
+        float dis = Vector2.Distance(new Vector2(x, y), Vector2.zero);
         //Treat scale as the distance that represents one curve.    
         return curve.Evaluate(dis / scale);
-
     }
-
-    public override void Intialize(int Seed, float Scale)
-    {
-
-    }
-
-
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,13 +22,12 @@ public class WorldGen : MonoBehaviour
     public int PhysOctaveCount = 4;     // DEV Var to test Generating a collison mesh with less layers.(UN-USED)
 
     private TerrainNoiseObject FallbackNoiseObject { get { return ScriptableObject.CreateInstance<ConstantNoiseObject>(); } }
+    private ITerrainNoise FallbackNoiseData { get { return new ConstantNoise(1);}}
 
     public Material[] mats;
-    public bool UseManyMats = false;
+    public bool UseManyMats {get{return mats.Length > 1;}}
     [Space]
-    public float SmoothingX = 100;
-    public float SmoothingZ = 100;
-
+    public float smoothing = 100;
 
     private int localX = 0;
     private int localZ = 0;
@@ -55,13 +55,16 @@ public class WorldGen : MonoBehaviour
     public float DecorDensity = 1;
     [Min(0), Tooltip("Number of attempts to place Decor per DecorChunk")]
     public int DecorAttempts = 100;
-    private TerrainNoiseObject DecorChanceMap;
+    private ITerrainNoise DecorChanceMap;
     private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
     [SerializeField]
     public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
     [Space]
     [SerializeField] private TerrainNoiseObject[] Octaves;
     [SerializeField] private TerrainNoiseObject ScaleMap;
+    private ITerrainNoise[] TerrainData;
+    private ITerrainNoise TerrainScale;
+
     [Space]
 
     [Header("Events")]
@@ -125,7 +128,7 @@ public class WorldGen : MonoBehaviour
         localX = 0;
         localZ = 0;
 
-        //Get 'True Raduis' or Diameter
+        
         TRadius = Radius * 2 + 1;
         DecorChanceMap = null;
     }
@@ -133,8 +136,9 @@ public class WorldGen : MonoBehaviour
     public void BuildWorld()
     {
         ClearWorldData();
-
-        Init_Seeds();
+        System.Random r = new System.Random();
+        InitSeeds(ref r);
+        InitNoiseData();
         WorldGenPreInit.Invoke();
 
         WorldGenStart.Invoke();
@@ -160,32 +164,89 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private void Init_Seeds()
+    /// <summary>
+    /// Ensure TerrainData has been intialized, and is equal length to Octaves
+    /// </summary>
+    private void ValidateOctaves()
+    {
+        if (TerrainData == null || TerrainData.Length != OctaveCount +1)
+        {
+            ITerrainNoise[] temp = new ITerrainNoise[OctaveCount+1];
+            //Octaves = new TerrainNoiseObject[OctaveCount];
+            for (int i = 0; i < OctaveCount; i++)
+            {
+                //see if we can reuse the old noise objects
+                if (TerrainData != null && i < TerrainData.Length)
+                {
+                    temp[i] = TerrainData[i];
+                }
+                else 
+                {
+                    temp[i] = FallbackNoiseData;
+                }
+            }
+            TerrainData = temp;
+        }
+    }
+
+    /// <summary>
+    /// Intialize TerrainScale from ScaleMap scriptableObject
+    /// If ScaleMap is null, use FallbackNoiseObject
+    /// </summary>
+    private void InitTerrainScale()
+    {
+        if (ScaleMap == null)
+        {
+            ScaleMap = FallbackNoiseObject;
+        }
+        TerrainScale = ScaleMap.Intialize(Seed, 3);
+    }
+
+    /// <summary>
+    /// Intialize the NoiseData for the World
+    /// </summary>
+    private void InitNoiseData()
+    {
+        //Intialize the Octaves
+        ValidateOctaves();
+        InitTerrainScale();
+        //Construct the Octaves
+        for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
+        {
+            TerrainData[OctaveIndex] = PrepareNoise(Octaves[OctaveIndex], Seeds[OctaveIndex + 1], Mathf.Pow(5, OctaveIndex));
+        }
+    }
+
+    private ITerrainNoise PrepareNoise(TerrainNoiseObject noiseAsset, int seed, float scale)
+    {
+        if (noiseAsset == null)
+        {
+            return FallbackNoiseData;
+        }
+        return noiseAsset.Intialize(seed, scale);
+    }
+
+    /// <summary>
+    /// Generates Array of Seeds for Terrain Octaves
+    /// </summary>
+    private void InitSeeds(ref System.Random r)
     {
         //If we are not using a preset Seed generate a new one
         if (!UseSeed)
             Seed = Random.Range(int.MinValue, int.MaxValue);
+        //Create the array of seeds
         Seeds = new int[OctaveCount + 2];
+        //Set the first seed to the overall world seed
         Seeds[0] = Seed;
-        //Create the Random object to be used
-        System.Random r = new System.Random(Seed);
+        //Create the Seeds to be used
+        r = new System.Random(Seed);
         Seeds[OctaveCount + 1] = r.Next();
-
-        //Intialize the Octaves
-        if (Octaves == null || Octaves.Length != OctaveCount)
-            Octaves = new TerrainNoiseObject[OctaveCount];
-
-        //Define the ScaleMap
-        PrepareNoise(ref ScaleMap);
-        ScaleMap.Intialize(Seed, 3);
-        //Construct the Octaves
         for (int OctaveIndex = 0; OctaveIndex < OctaveCount; OctaveIndex++)
         {
             //Get the Seed for Each Octave
-            Seeds[OctaveIndex + 1] = r.Next();
-            PrepareNoise(ref Octaves[OctaveIndex]);
-            Octaves[OctaveIndex].Intialize(Seeds[OctaveIndex], Mathf.RoundToInt(Mathf.Pow(5, OctaveIndex)));//New Terrain Noise (Seed, Grid Size(5^Octave)
+            Seeds[OctaveIndex +1] = r.Next();
         }
+    
     }
 
     private void BuildMesh(int Tx, int Ty, GameObject HoldsMesh)
@@ -197,7 +258,6 @@ public class WorldGen : MonoBehaviour
         else
         {
             UpdateMesh(Tx, Ty, HoldsMesh, true);
-
             //BuildMeshSingle(Tx, Ty,HoldsMesh);
         }
     }
@@ -271,21 +331,22 @@ public class WorldGen : MonoBehaviour
         float ly = Ty * TileSize;
         if (!RunInstant)
             yield return null;
+        int halfTile = TileSize / 2;
         for (int y = 0; y < TSize; y++)
         {
+            float Yi = (y * VertDis) - halfTile;
             for (int x = 0; x < TSize; x++)
             {
                 int id = y * TSize + x;
-                float Xi = (x * VertDis) - (TileSize / 2);
-                float Yi = (y * VertDis) - (TileSize / 2);
+                float Xi = (x * VertDis) - halfTile;
                 verts[id] = new Vector3(
                     Xi,
                     GetHeight(Xi + (lx), Yi + (ly), getRatio(Xi + lx, Yi + ly), MaxLOD),
                     Yi);
-                #region UV map
+
                 uv[id] = gridUV(x, y);
                 //normals[id] = GetNormal(Xi + lx, Yi + ly);	// Disabled for now, Being reworked in a sperate branch
-                #endregion
+
                 // Build Triangles
                 AddTriangle(x, y, id, TSize, tri);
                 //yield return null;
@@ -470,9 +531,9 @@ public class WorldGen : MonoBehaviour
         float output = 0;
         for (int i = OctaveCount - 1; i >= LOD; i--)
         {
-            output += Octaves[i].getHeight(new Vector2(px, py));
+            output += TerrainData[i].getHeight(px, py);
         }
-        output *= Mathf.Abs(ScaleMap.getHeight(new Vector2(px / SmoothingX, py / SmoothingZ)));
+        output *= Mathf.Abs(TerrainScale.getHeight(px / smoothing, py / smoothing));
 
         //This really only needs done if we're close enought to something that modifies terrain.
         //We could store a list of modifiers and adjust from there.
@@ -499,8 +560,7 @@ public class WorldGen : MonoBehaviour
         //Check if DecorChanceMap has been generated.
         if (DecorChanceMap == null)
         {
-            PrepareNoise(ref DecorChanceMap);
-            DecorChanceMap.Intialize(Seeds[OctaveCount + 1], 20);
+            DecorChanceMap = ScriptableObject.CreateInstance<OggalNoise>().Intialize(Seeds[OctaveCount + 1], DecorDensity);
         }
         //Find the bounds of the Tile
         float minX, minZ;
@@ -545,7 +605,7 @@ public class WorldGen : MonoBehaviour
                 if (dChunk == null)
                 {
                     dChunk = new DecorChunk(chunkIndex,
-                        Mathf.RoundToInt(DecorChanceMap.getHeight(new Vector2(_X, _Z)) * chunkIndex.sqrMagnitude)
+                        Mathf.RoundToInt(DecorChanceMap.getHeight(_X, _Z) * chunkIndex.sqrMagnitude)
                         , this);
 
                     DecorChunks.Add(chunkIndex, dChunk);
@@ -591,7 +651,7 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    public void MoveX(bool t)
+    private void MoveX(bool t)
     {
         if (t)
         {
@@ -696,16 +756,6 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    #endregion
-    private void PrepareNoise(ref TerrainNoiseObject noise)
-    {
-        if (noise == null)
-            noise = Instantiate(FallbackNoiseObject);
-    }
+#endregion
 
 }
-
-
-
-
-
