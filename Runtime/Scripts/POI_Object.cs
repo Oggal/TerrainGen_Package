@@ -1,10 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 
-[CreateAssetMenuAttribute(fileName = "New POI", menuName = "Terrain Noise/Modifiers/POI")]
+[CreateAssetMenu(fileName = "New POI", menuName = "Terrain Noise/Modifiers/POI")]
 public class POI_Object : ScriptableObject
 {
     public Vector3 Position;
@@ -14,6 +13,7 @@ public class POI_Object : ScriptableObject
 
     public virtual float GetRatio(float pointX, float pointY)
     {
+        //Debug.Log("GetRatio-ed");
         float distance = Vector2.Distance(new Vector2(Position.x, Position.z), new Vector2(pointX, pointY));
         if (distance > outerRadius + innerRadius)
         {

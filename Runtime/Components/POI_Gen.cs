@@ -91,8 +91,9 @@ public class POI_Gen : MonoBehaviour
     public GameObject[] GetPOIinRect(Rect area)
     {
         List<GameObject> poi_OnTile = new List<GameObject>();
-        foreach (POI_Object tMod in Mods)
+        for(int i = 0; i < Mods.Length; i++)
         {
+            var tMod = Mods[i];
             Vector3 poiPos = tMod.GetPosition();
             GameObject obj = null;
             if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
