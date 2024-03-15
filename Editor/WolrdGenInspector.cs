@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,6 +16,7 @@ public class WolrdGenInspector : Editor
 
         if (GUILayout.Button("Screen Cap"))
         {
+            Directory.CreateDirectory(Application.dataPath + "/Oggal/ScreenShots/");
             ScreenCapture.CaptureScreenshot(Application.dataPath +
                 "/Oggal/ScreenShots/" + ((System.DateTime.Today.ToShortDateString()).Replace("/", "-"))
                 + "_" + ((System.DateTime.Now.ToShortTimeString()).Replace(" ", "").Replace(":", "")) + ".png", 1);

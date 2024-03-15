@@ -41,8 +41,6 @@ public class WorldGen : MonoBehaviour
     public int Radius;
 
 
-
-
     [Header("World Contents")]
     [Tooltip("Should the generator check for POI Objects")]
     public bool SpawnPOIs = false;
@@ -99,22 +97,44 @@ public class WorldGen : MonoBehaviour
 
     }
 
-
     public void ClearChildren(GameObject g)
     {
-        while (g.transform.childCount > 0)
-        {
-#if !UNITY_EDITOR
-			Destroy(g.transform.GetChild(0).gameObject);
-#else
-            DestroyImmediate(g.transform.GetChild(0).gameObject);
-#endif
-        }
+        StartCoroutine(_ClearChildren(g));
     }
+
+    IEnumerator _ClearChildren(GameObject g)
+    {
+        int i = 0;
+        while (g!=null && g.transform.childCount > 0)
+        {
+            if(g.transform.GetChild(0) == null)
+            {
+                Debug.Log(string.Format("Child 0 of gameobject {0} is null", g.name)); 
+                break;
+            }
+            #if !UNITY_EDITOR
+            //Debug.Log("Destroying: " + g.transform.GetChild(0).name);
+			Destroy(g.transform.GetChild(0).gameObject);
+            #else
+            DestroyImmediate(g.transform.GetChild(0).gameObject);
+            #endif
+            i++;
+            if(i > 100)
+            {
+                yield return null;
+                i = 0;
+            }
+            
+        }
+        Debug.Log("Children Cleared From Object: " + g.name);
+        yield return null;
+    }
+
 
     public void ClearChildren()
     {
-        ClearChildren(gameObject);
+        if(gameObject!=null)
+            ClearChildren(gameObject);
     }
 
 
@@ -314,6 +334,7 @@ public class WorldGen : MonoBehaviour
     private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM, bool RunInstant = false)
     {
         if (HoldsM) { ClearChildren(HoldsM); }
+        Debug.Log("Building Tile: " + Tx + " " + Ty);
         HoldsM.GetComponent<MeshRenderer>().enabled = false;
         Mesh m = HoldsM.GetComponent<MeshFilter>().sharedMesh;
         if (m == null)
@@ -365,11 +386,10 @@ public class WorldGen : MonoBehaviour
 
         HoldsM.GetComponent<MeshFilter>().mesh = m;
 
-        HoldsM.GetComponent<MeshRenderer>().enabled = true;
 
         if (!RunInstant)
             yield return null;
-
+        Debug.Log("Building Physics Mesh for Tile: " + Tx + " " + Ty);
         // Build Physics Mesh	
         m = new Mesh();
         TSize = P_VertexCount + 1;
@@ -407,18 +427,23 @@ public class WorldGen : MonoBehaviour
         if (!RunInstant)
             yield return null;
         (HoldsM.GetComponent<MeshCollider>() == null ? HoldsM.AddComponent<MeshCollider>() : HoldsM.GetComponent<MeshCollider>()).sharedMesh = m;
+        HoldsM.GetComponent<MeshRenderer>().enabled = true;
 
-
+        Debug.Log("Tile Built: " + Tx + " " + Ty);
         if (buildDecor || SpawnPOIs)
         {
+            Debug.Log("Building Decor for Tile: " + Tx + " " + Ty);
             BuildDecor(Tx, Ty, HoldsM);
         }
+        if (!RunInstant)
+            yield return null;
         TilesBuilding.RemoveAt(0);
         if (!(TilesBuilding.Count > 0))
         {
             WorldGenFinish.Invoke();
+            Debug.Log("World Gen Finished");
         }
-
+        Debug.Log("Tile Decor Built: " + Tx + " " + Ty);
     }
 
     Vector3 GetNormal(float x, float z)
@@ -510,10 +535,10 @@ public class WorldGen : MonoBehaviour
         tile.transform.localScale = Vector3.one;
         tile.transform.position = Vector3.Scale(new Vector3(Tx * TileSize, 0, Ty * TileSize), transform.localScale);
 
-        if (buildDecor || SpawnPOIs)
-        {
-            BuildDecor(Tx, Ty, tile);
-        }
+        // if (buildDecor || SpawnPOIs)
+        // {
+        //     BuildDecor(Tx, Ty, tile);
+        // }
 
 
         return tile;
@@ -537,7 +562,7 @@ public class WorldGen : MonoBehaviour
 
         //This really only needs done if we're close enought to something that modifies terrain.
         //We could store a list of modifiers and adjust from there.
-        if (GetComponent<POI_Gen>() != null && ratio != 0)
+        if (ratio != 0 && GetComponent<POI_Gen>() != null)
         {
             getRatio(px, py, out float height);
 
@@ -578,7 +603,7 @@ public class WorldGen : MonoBehaviour
         {
             deco.transform.SetParent(tile.transform, true);
         }
-
+        Debug.Log("BuildDecor finished for Tile:" + tile.name);
     }
 
 
@@ -605,13 +630,12 @@ public class WorldGen : MonoBehaviour
                 if (dChunk == null)
                 {
                     dChunk = new DecorChunk(chunkIndex,
-                        Mathf.RoundToInt(DecorChanceMap.getHeight(_X, _Z) * chunkIndex.sqrMagnitude)
+                        Mathf.RoundToInt(DecorChanceMap.getHeight(_X, _Z) * chunkIndex.sqrMagnitude) + Seeds[OctaveCount+1]
                         , this);
 
                     DecorChunks.Add(chunkIndex, dChunk);
                 }
                 AllDecore.AddRange(dChunk.getDecor(area));
-
             }
         }
 
@@ -653,6 +677,7 @@ public class WorldGen : MonoBehaviour
 
     private void MoveX(bool t)
     {
+        Debug.Log("Moving X: " + t);
         if (t)
         {
             localX++;
@@ -706,6 +731,7 @@ public class WorldGen : MonoBehaviour
 
     private void MoveY(bool t)
     {
+        Debug.Log("Moving Y: " + t);
         if (t)
         {
             //North

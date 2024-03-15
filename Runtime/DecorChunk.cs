@@ -21,9 +21,9 @@ public class DecorChunk
     }
 
     /*
-          So do we ant to return an array of DecorTemplate or do we want to return a diffrent data object array?
-          I know we want to pool out decor objects so I'd like to avoid instanciating a bunch of game objects here...
-          That being said, gameObjects mean we can start testing quick.
+        So do we want to return an array of DecorTemplate or do we want to return a diffrent data object array?
+        I know we want to pool out decor objects so I'd like to avoid instanciating a bunch of game objects here...
+        That being said, gameObjects mean we can start testing quick.
       */
     public GameObject[] getDecor(Rect _worldSpace)
     {

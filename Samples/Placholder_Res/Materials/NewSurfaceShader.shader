@@ -21,7 +21,7 @@ Shader "Custom/FadeToWhite" {
             fixed4 _Color;
 
             void surf(Input IN, inout SurfaceOutput o) {
-                float angle = dot(IN.worldNormal, float3(0, 1, 0));
+                float3 angle = cross(IN.worldNormal, float3(0, 1, 0));
                 angle = max((angle),0);
                 o.Albedo = _Color.rgb * angle;
                 o.Alpha = angle;
