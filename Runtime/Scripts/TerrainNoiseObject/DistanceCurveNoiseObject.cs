@@ -18,8 +18,6 @@ public class DistanceCurveNoiseObject : TerrainNoiseObject
     {
         return new DistanceCurveNoise(scale, curve);
     }
-
-
 }
 
 public class DistanceCurveNoise : ITerrainNoise
