@@ -585,7 +585,7 @@ public class WorldGen : MonoBehaviour
         //Check if DecorChanceMap has been generated.
         if (DecorChanceMap == null)
         {
-            DecorChanceMap = ScriptableObject.CreateInstance<OggalNoise>().Intialize(Seeds[OctaveCount + 1], DecorDensity);
+            DecorChanceMap = ScriptableObject.CreateInstance<OggalNoise>().Intialize(Seeds[OctaveCount + 1], DecorChunkSize);
         }
         //Find the bounds of the Tile
         float minX, minZ;
