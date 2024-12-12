@@ -589,8 +589,8 @@ public class WorldGen : MonoBehaviour
         }
         //Find the bounds of the Tile
         float minX, minZ;
-        minX = ((Tx - 0.5f) * TileSize);
-        minZ = ((Ty - 0.5f) * TileSize);
+        minX = (Tx - 0.5f) * TileSize;
+        minZ = (Ty - 0.5f) * TileSize;
 
         Rect TileArea = new Rect(minX, minZ, TileSize, TileSize);
         List<GameObject> Decor = new List<GameObject>();
@@ -603,7 +603,6 @@ public class WorldGen : MonoBehaviour
         {
             deco.transform.SetParent(tile.transform, true);
         }
-        Debug.Log("BuildDecor finished for Tile:" + tile.name);
     }
 
 
@@ -618,10 +617,9 @@ public class WorldGen : MonoBehaviour
         zMinIndex = Mathf.RoundToInt((area.yMin) / DecorChunkSize);
         zMaxIndex = Mathf.RoundToInt((area.yMax) / DecorChunkSize);
 
-
-        for (int _Z = zMinIndex; _Z <= zMaxIndex; _Z++)
+        for (int _Z = zMinIndex-1; _Z <= zMaxIndex; _Z++)
         {
-            for (int _X = xMinIndex; _X <= xMaxIndex; _X++)
+            for (int _X = xMinIndex-1; _X <= xMaxIndex; _X++)
             {
                 Vector2Int chunkIndex = new Vector2Int(_X, _Z);
                 DecorChunk dChunk;
