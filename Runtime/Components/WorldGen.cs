@@ -585,12 +585,12 @@ public class WorldGen : MonoBehaviour
         //Check if DecorChanceMap has been generated.
         if (DecorChanceMap == null)
         {
-            DecorChanceMap = ScriptableObject.CreateInstance<OggalNoise>().Intialize(Seeds[OctaveCount + 1], DecorDensity);
+            DecorChanceMap = ScriptableObject.CreateInstance<OggalNoise>().Intialize(Seeds[OctaveCount + 1], DecorChunkSize);
         }
         //Find the bounds of the Tile
         float minX, minZ;
-        minX = ((Tx - 0.5f) * TileSize);
-        minZ = ((Ty - 0.5f) * TileSize);
+        minX = (Tx - 0.5f) * TileSize;
+        minZ = (Ty - 0.5f) * TileSize;
 
         Rect TileArea = new Rect(minX, minZ, TileSize, TileSize);
         List<GameObject> Decor = new List<GameObject>();
@@ -603,7 +603,6 @@ public class WorldGen : MonoBehaviour
         {
             deco.transform.SetParent(tile.transform, true);
         }
-        Debug.Log("BuildDecor finished for Tile:" + tile.name);
     }
 
 
@@ -613,11 +612,10 @@ public class WorldGen : MonoBehaviour
 
         int xMinIndex, xMaxIndex, zMinIndex, zMaxIndex;
 
-        xMinIndex = Mathf.RoundToInt((area.xMin) / DecorChunkSize);
-        xMaxIndex = Mathf.RoundToInt((area.xMax) / DecorChunkSize);
-        zMinIndex = Mathf.RoundToInt((area.yMin) / DecorChunkSize);
-        zMaxIndex = Mathf.RoundToInt((area.yMax) / DecorChunkSize);
-
+        xMinIndex = Mathf.RoundToInt((area.xMin) / DecorChunkSize) - 1;
+        xMaxIndex = Mathf.RoundToInt((area.xMax) / DecorChunkSize) + 1;
+        zMinIndex = Mathf.RoundToInt((area.yMin) / DecorChunkSize) - 1;
+        zMaxIndex = Mathf.RoundToInt((area.yMax) / DecorChunkSize) + 1;
 
         for (int _Z = zMinIndex; _Z <= zMaxIndex; _Z++)
         {

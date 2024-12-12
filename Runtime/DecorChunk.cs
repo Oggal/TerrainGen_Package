@@ -52,7 +52,7 @@ public class DecorChunk
         {
             Vector2 pos = new Vector2((float)rand.NextDouble(), (float)rand.NextDouble());     //Vector2 ([0,1],[0,1])
             int decorSeed = Mathf.RoundToInt(Mathf.Floor((float)rand.NextDouble() * worldRef.decorObjects.Count));
-            if (rand.NextDouble() > worldRef.DecorDensity)
+            if (rand.NextDouble() <= worldRef.DecorDensity)
             {
                 decorDict.Add(pos, worldRef.decorObjects[decorSeed]);
             }
