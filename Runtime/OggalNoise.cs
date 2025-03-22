@@ -6,6 +6,7 @@ using UnityEngine;
 public class OggalNoise : TerrainNoiseObject
 {
     [SerializeField] float setScale = 0;
+    [SerializeField] float GridScale = 1;
     public TerrainNoise myNoise;
     public override bool isValid { get => (myNoise != null); }
 
@@ -13,7 +14,7 @@ public class OggalNoise : TerrainNoiseObject
     {
         if (setScale != 0)
             Scale = setScale;
-        myNoise = new TerrainNoise(Seed, Mathf.RoundToInt(Scale));
+        myNoise = new TerrainNoise(Seed, Mathf.RoundToInt(Scale), GridScale);
         return myNoise;
     }
 

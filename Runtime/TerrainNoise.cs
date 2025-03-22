@@ -25,12 +25,14 @@ public class TerrainNoise : ITerrainNoise
 {
     int Seed;
     public int SideSize = 5;
+    public float GridScale = 1;
     Dictionary<int, double> VectorLib = new Dictionary<int, double>();
 
-    public TerrainNoise(int i, int Size = 5)
+    public TerrainNoise(int i, int size = 5, float gridScale = 1)
     {
         Seed = i;
-        SideSize = Size;
+        SideSize = size;
+        GridScale = gridScale;
     }
 
 
@@ -56,7 +58,13 @@ public class TerrainNoise : ITerrainNoise
 
     public float getHeight(float x, float y)
     {
-        return getBaseHeight(x, y);
+        if(GridScale != 0){
+            x = x / GridScale;
+            y = y / GridScale;
+        }
+
+        var offset = SideSize / SideSize+1;
+        return getBaseHeight(x+offset, y+offset);
     }
 
 
