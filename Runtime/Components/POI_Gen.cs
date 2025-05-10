@@ -16,9 +16,9 @@ public class POI_Gen : MonoBehaviour
     WorldGen generator;
 
     [SerializeField]
-    private POI_Object[] StaticModifiers;
+    protected POI_Object[] StaticModifiers;
 
-    private readonly List<POI_Object> ProcMods = new List<POI_Object>();
+    protected readonly List<POI_Object> ProcMods = new List<POI_Object>();
     public POI_Object[] Mods
     {
         get
