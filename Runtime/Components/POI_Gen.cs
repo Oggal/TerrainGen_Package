@@ -19,7 +19,7 @@ public class POI_Gen : MonoBehaviour
     protected POI_Object[] StaticModifiers;
 
     protected readonly List<POI_Object> ProcMods = new List<POI_Object>();
-    public POI_Object[] Mods
+    public virtual POI_Object[] Mods
     {
         get
         {
@@ -48,8 +48,8 @@ public class POI_Gen : MonoBehaviour
         if (generator == null)
             generator = GetComponent<WorldGen>();
         else
-            generator.WorldGenPreInit.RemoveListener(this.Gen_POIs);
-        generator.WorldGenPreInit.AddListener(this.Gen_POIs);
+            generator.WorldGenPreInit.RemoveListener(Gen_POIs);
+        generator.WorldGenPreInit.AddListener(Gen_POIs);
     }
 
     [ContextMenu("Clear")]
@@ -57,7 +57,7 @@ public class POI_Gen : MonoBehaviour
     {
         ProcMods.Clear();
         if (generator)
-            generator.WorldGenPreInit.RemoveListener(this.Gen_POIs);
+            generator.WorldGenPreInit.RemoveListener(Gen_POIs);
     }
 
     void OnValidate()
@@ -69,7 +69,7 @@ public class POI_Gen : MonoBehaviour
     }
 
 
-    public void Gen_POIs()
+    public virtual void Gen_POIs()
     {
         ProcMods.Clear();
         int seed = generator.Seed;
