@@ -57,10 +57,14 @@ public class WorldGen : MonoBehaviour
     private Dictionary<Vector2Int, DecorChunk> DecorChunks = new Dictionary<Vector2Int, DecorChunk>();
     [SerializeField]
     public List<DecorTemplate> decorObjects = new List<DecorTemplate>();
+    
     [Space]
     [SerializeField] private TerrainNoiseObject[] Octaves;
+
     [SerializeField] private TerrainNoiseObject ScaleMap;
-    private ITerrainNoise[] TerrainData;
+
+    [HideInInspector] public ITerrainNoise[] TerrainData;
+    
     private ITerrainNoise TerrainScale;
 
     [Space]
@@ -116,7 +120,12 @@ public class WorldGen : MonoBehaviour
             //Debug.Log("Destroying: " + g.transform.GetChild(0).name);
 			Destroy(g.transform.GetChild(0).gameObject);
             #else
-            DestroyImmediate(g.transform.GetChild(0).gameObject);
+            var child = g.transform.GetChild(0);
+            foreach (var listener in child.GetComponentsInChildren<POI_Listener>())
+            {
+                listener.OnDespawned.Invoke();
+            }
+            DestroyImmediate(child.gameObject);
             #endif
             i++;
             if(i > 100)
@@ -582,29 +591,65 @@ public class WorldGen : MonoBehaviour
     public void BuildDecor(int Tx, int Ty, GameObject tile)
     {
         ClearChildren(tile);
-        //Check if DecorChanceMap has been generated.
+
+        // Handle Decor
+        if (buildDecor)
+        {
+            BuildTileDecor(Tx, Ty, tile);
+        }
+
+        // Handle POIs
+        if (SpawnPOIs)
+        {
+            BuildTilePOIs(Tx, Ty, tile);
+        }
+    }
+
+    private Rect CalculateTileArea(int Tx, int Ty)
+    {
+        float minX = (Tx - 0.5f) * TileSize;
+        float minZ = (Ty - 0.5f) * TileSize;
+        return new Rect(minX, minZ, TileSize, TileSize);
+    }
+
+    // Updated usages
+    private void BuildTileDecor(int Tx, int Ty, GameObject tile)
+    {
         if (DecorChanceMap == null)
         {
             DecorChanceMap = ScriptableObject.CreateInstance<OggalNoise>().Intialize(Seeds[OctaveCount + 1], DecorChunkSize);
         }
-        //Find the bounds of the Tile
-        float minX, minZ;
-        minX = (Tx - 0.5f) * TileSize;
-        minZ = (Ty - 0.5f) * TileSize;
 
-        Rect TileArea = new Rect(minX, minZ, TileSize, TileSize);
-        List<GameObject> Decor = new List<GameObject>();
-        if (buildDecor)
-            Decor.AddRange(GetDecorinRect(TileArea));
-        if (GetComponent<POI_Gen>())
-            Decor.AddRange(GetComponent<POI_Gen>().GetPOIinRect(TileArea));
+        Rect TileArea = CalculateTileArea(Tx, Ty);
 
-        foreach (GameObject deco in Decor)
+        List<GameObject> decorObjects = new List<GameObject>();
+        decorObjects.AddRange(GetDecorinRect(TileArea));
+
+        foreach (GameObject decor in decorObjects)
         {
-            deco.transform.SetParent(tile.transform, true);
+            decor.transform.SetParent(tile.transform, true);
         }
     }
 
+    private void BuildTilePOIs(int Tx, int Ty, GameObject tile)
+    {
+        var poiGen = GetComponent<POI_Gen>();
+        if (poiGen == null)
+        {
+            return;
+        }
+        Rect TileArea = CalculateTileArea(Tx, Ty);
+
+        foreach (var poiData in poiGen.GetPOIinRect(TileArea))
+        {
+            var poi = poiData.GetGameObject();
+            foreach (var listener in poi.GetComponentsInChildren<POI_Listener>())
+            {
+                listener.OnSpawned.Invoke(poiData.ID,poiData.Seed);
+            }
+            poi.transform.SetParent(tile.transform, true);
+        }
+    }
 
     private GameObject[] GetDecorinRect(Rect area)
     {

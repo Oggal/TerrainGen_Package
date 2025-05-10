@@ -5,18 +5,20 @@ using UnityEngine;
 [RequireComponent(typeof(WorldGen))]
 public class POI_Gen : MonoBehaviour
 {
-    public ulong worldRadius = 5000000;
     public uint worldResolution = 100;
+
     public uint[] cityCounts;
 
     [SerializeField]
     POI_Object[] modifier_templates;
+
     [SerializeField]
     WorldGen generator;
 
     [SerializeField]
     private POI_Object[] StaticModifiers;
-    private List<POI_Object> ProcMods = new List<POI_Object>();
+
+    private readonly List<POI_Object> ProcMods = new List<POI_Object>();
     public POI_Object[] Mods
     {
         get
@@ -27,10 +29,17 @@ public class POI_Gen : MonoBehaviour
             return temp.ToArray();
         }
     }
-    // Start is called before the first frame update
+
+    // OnEnable is called when the script is enabled
     void OnEnable()
     {
         SetUp();
+    }
+
+    // OnDisable is called when the script is disabled
+    void OnDisable()
+    {
+        Clear();
     }
 
     [ContextMenu("SetUp")]
@@ -78,30 +87,28 @@ public class POI_Gen : MonoBehaviour
                 x = ((float)rand.NextDouble() * 2 * worldResolution) - worldResolution;
                 y = ((float)rand.NextDouble() * 2 * worldResolution) - worldResolution;
                 mod.Position = new Vector3(x, generator.GetHeight(x, y), y);
-                mod.innerRadius = 50f;
-                mod.outerRadius = 25f;
 
                 mod.Prefab = modifier_template.Prefab;
+                mod.Seed = rand.Next();
+                mod.ID = NewMods.Count + 1;
                 NewMods.Add(mod);
             }
         }
         ProcMods.AddRange(NewMods);
     }
 
-    public GameObject[] GetPOIinRect(Rect area)
+    public POI_Object[] GetPOIinRect(Rect area)
     {
-        List<GameObject> poi_OnTile = new List<GameObject>();
-        for(int i = 0; i < Mods.Length; i++)
+        var poiOnTile = new List<POI_Object>();
+        for (int i = 0; i < Mods.Length; i++)
         {
             var tMod = Mods[i];
             Vector3 poiPos = tMod.GetPosition();
             GameObject obj = null;
             if (area.Contains(new Vector2(poiPos.x, poiPos.z)))
-                obj = tMod.GetGameObject();
-            if (obj != null)
-                poi_OnTile.Add(obj);
+                poiOnTile.Add(tMod);
         }
-        return poi_OnTile.ToArray();
+        return poiOnTile.ToArray();
     }
 }
 

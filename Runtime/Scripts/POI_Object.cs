@@ -9,11 +9,12 @@ public class POI_Object : ScriptableObject
     public Vector3 Position;
     public GameObject Prefab;
     public float innerRadius, outerRadius;
+    public int ID;
+    public int Seed;
 
 
     public virtual float GetRatio(float pointX, float pointY)
     {
-        //Debug.Log("GetRatio-ed");
         float distance = Vector2.Distance(new Vector2(Position.x, Position.z), new Vector2(pointX, pointY));
         if (distance > outerRadius + innerRadius)
         {
