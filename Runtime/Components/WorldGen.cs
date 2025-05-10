@@ -162,9 +162,9 @@ public class WorldGen : MonoBehaviour
         DecorChanceMap = null;
     }
 
-    public void BuildWorld()
+    public void BuildWorld(int x = 0, int z = 0)
     {
-        ClearWorldData(int x = 0, int z = 0);
+        ClearWorldData();
         localX = x;
         localZ = z;
         System.Random r = new System.Random();
