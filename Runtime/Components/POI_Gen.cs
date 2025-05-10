@@ -5,18 +5,20 @@ using UnityEngine;
 [RequireComponent(typeof(WorldGen))]
 public class POI_Gen : MonoBehaviour
 {
-    //public ulong worldRadius = 5000000;
     public uint worldResolution = 100;
+
     public uint[] cityCounts;
 
     [SerializeField]
     POI_Object[] modifier_templates;
+
     [SerializeField]
     WorldGen generator;
 
     [SerializeField]
     private POI_Object[] StaticModifiers;
-    private List<POI_Object> ProcMods = new List<POI_Object>();
+
+    private readonly List<POI_Object> ProcMods = new List<POI_Object>();
     public POI_Object[] Mods
     {
         get
@@ -98,7 +100,7 @@ public class POI_Gen : MonoBehaviour
     public POI_Object[] GetPOIinRect(Rect area)
     {
         var poiOnTile = new List<POI_Object>();
-        for(int i = 0; i < Mods.Length; i++)
+        for (int i = 0; i < Mods.Length; i++)
         {
             var tMod = Mods[i];
             Vector3 poiPos = tMod.GetPosition();
