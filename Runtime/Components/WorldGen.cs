@@ -164,7 +164,9 @@ public class WorldGen : MonoBehaviour
 
     public void BuildWorld()
     {
-        ClearWorldData();
+        ClearWorldData(int x = 0, int z = 0);
+        localX = x;
+        localZ = z;
         System.Random r = new System.Random();
         InitSeeds(ref r);
         InitNoiseData();
@@ -187,7 +189,7 @@ public class WorldGen : MonoBehaviour
             {
                 int id = (Radius - y) * TRadius + (x + Radius);
 
-                Tiles[id] = BuildTile(x, y);
+                Tiles[id] = BuildTile(x+ localX, y + localZ);
                 Tiles[id].name += id;
             }
         }
@@ -692,6 +694,10 @@ public class WorldGen : MonoBehaviour
     #endregion
 
     #region World Control
+    public Vector2Int getWorldCenter(Vector3 pos)
+    {
+        return new Vector2Int(Mathf.RoundToInt(pos.x / TileSize), Mathf.RoundToInt(pos.z / TileSize));
+    }
 
     private void CheckWorldCenter()
     {
