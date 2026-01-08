@@ -456,13 +456,12 @@ public class WorldGen : MonoBehaviour
         {
             yield return null;
         }
-        if (TilesBuilding.Count <= 0)
-        {
+
             TilesBuilding.RemoveAt(0);
-        }
+
         Debug.Log("Tile Built: " + Tx + " " + Ty);
         TileLoaded?.Invoke(Tx, Ty);
-        if (!(TilesBuilding.Count > 0))
+        if (TilesBuilding.Count <= 0)
         {
             WorldGenFinish.Invoke();
             Debug.Log("World Gen Finished");
