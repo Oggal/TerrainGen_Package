@@ -78,7 +78,11 @@ public class WorldGen : MonoBehaviour
 
     [Tooltip("Called before World Generation starts")]
     public UnityEvent WorldGenPreInit;
-
+    [Space]
+    [Tooltip("Called when Tile is flagged to be removed")]
+    public TileEvent TileUnloaded;
+    [Tooltip("Called after Tile has loaded")]
+    public TileEvent TileLoaded;
 
 
     private int TRadius;
@@ -335,7 +339,6 @@ public class WorldGen : MonoBehaviour
 
     private void UpdateMesh(int Tx, int Ty, GameObject m, bool RunInstant = false)
     {
-
         IEnumerator i = BuildMeshSlow(Tx, Ty, m, RunInstant);
         TilesBuilding.Add(i);
         StartCoroutine(i);
@@ -344,7 +347,9 @@ public class WorldGen : MonoBehaviour
 
     private IEnumerator BuildMeshSlow(int Tx, int Ty, GameObject HoldsM, bool RunInstant = false)
     {
-        if (HoldsM) { ClearChildren(HoldsM); }
+        if (HoldsM) {
+            ClearChildren(HoldsM); 
+        }
         Debug.Log("Building Tile: " + Tx + " " + Ty);
         HoldsM.GetComponent<MeshRenderer>().enabled = false;
         Mesh m = HoldsM.GetComponent<MeshFilter>().sharedMesh;
@@ -440,21 +445,28 @@ public class WorldGen : MonoBehaviour
         (HoldsM.GetComponent<MeshCollider>() == null ? HoldsM.AddComponent<MeshCollider>() : HoldsM.GetComponent<MeshCollider>()).sharedMesh = m;
         HoldsM.GetComponent<MeshRenderer>().enabled = true;
 
-        Debug.Log("Tile Built: " + Tx + " " + Ty);
+        
         if (buildDecor || SpawnPOIs)
         {
             Debug.Log("Building Decor for Tile: " + Tx + " " + Ty);
             BuildDecor(Tx, Ty, HoldsM);
+            Debug.Log("Tile Decor Built: " + Tx + " " + Ty);
         }
         if (!RunInstant)
+        {
             yield return null;
-        TilesBuilding.RemoveAt(0);
+        }
+        if (TilesBuilding.Count <= 0)
+        {
+            TilesBuilding.RemoveAt(0);
+        }
+        Debug.Log("Tile Built: " + Tx + " " + Ty);
+        TileLoaded?.Invoke(Tx, Ty);
         if (!(TilesBuilding.Count > 0))
         {
             WorldGenFinish.Invoke();
             Debug.Log("World Gen Finished");
         }
-        Debug.Log("Tile Decor Built: " + Tx + " " + Ty);
     }
 
     Vector3 GetNormal(float x, float z)
@@ -559,7 +571,6 @@ public class WorldGen : MonoBehaviour
     {
         return GetHeight(px, py, getRatio(px, py));
     }
-
 
     private float GetHeight(float px, float py, float ratio = 0.0f, int LOD = 0)
     {
@@ -735,6 +746,10 @@ public class WorldGen : MonoBehaviour
             {
                 int id = i * TRadius;
                 Vector3 p = new Vector3((localX + Radius) * TileSize, 0, (localZ + (Radius - i)) * TileSize);
+                int X = (int)Tiles[id].transform.position.x/TileSize;
+                int Y = (int)Tiles[id].transform.position.y / TileSize;
+
+                TileUnloaded?.Invoke(X,Y);
                 UpdateMesh(localX + Radius, localZ + (Radius - i), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
@@ -759,6 +774,10 @@ public class WorldGen : MonoBehaviour
             {
                 int id = ((i + 1) * TRadius) - 1;
                 Vector3 p = new Vector3((localX - Radius) * TileSize * transform.localScale.x, 0, (localZ + (Radius - i)) * TileSize * transform.localScale.z);
+                int X = (int)Tiles[id].transform.position.x / TileSize;
+                int Y = (int)Tiles[id].transform.position.y / TileSize;
+
+                TileUnloaded?.Invoke(X, Y);
                 UpdateMesh(localX - Radius, localZ + (Radius - i), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
@@ -790,6 +809,10 @@ public class WorldGen : MonoBehaviour
                 int id = (TRadius * (TRadius - 1)) + i;
 
                 Vector3 p = new Vector3((localX + (i - Radius)) * TileSize * transform.localScale.x, 0, (localZ + Radius) * TileSize * transform.localScale.z);
+                int X = (int)Tiles[id].transform.position.x / TileSize;
+                int Y = (int)Tiles[id].transform.position.y / TileSize;
+
+                TileUnloaded?.Invoke(X, Y);
                 UpdateMesh(localX + (i - Radius), (localZ + Radius), Tiles[id]);
                 Tiles[id].transform.position = p;
             }
@@ -813,6 +836,10 @@ public class WorldGen : MonoBehaviour
             {
 
                 Vector3 p = new Vector3((localX + (i - Radius)) * TileSize * transform.localScale.x, 0, (localZ - Radius) * TileSize * transform.localScale.z);
+                int X = (int)Tiles[i].transform.position.x / TileSize;
+                int Y = (int)Tiles[i].transform.position.y / TileSize;
+
+                TileUnloaded?.Invoke(X, Y);
                 UpdateMesh((localX + (i - Radius)), (localZ - Radius), Tiles[i]);
                 Tiles[i].transform.position = p;
 
