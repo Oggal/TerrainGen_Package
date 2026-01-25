@@ -87,7 +87,8 @@ public class POI_Gen : MonoBehaviour
                 x = ((float)rand.NextDouble() * 2 * worldResolution) - worldResolution;
                 y = ((float)rand.NextDouble() * 2 * worldResolution) - worldResolution;
                 mod.Position = new Vector3(x, generator.GetHeight(x, y), y);
-
+                mod.innerRadius = modifier_template.innerRadius;
+                mod.outerRadius = modifier_template.outerRadius;
                 mod.Prefab = modifier_template.Prefab;
                 mod.Seed = rand.Next();
                 mod.ID = NewMods.Count + 1;
